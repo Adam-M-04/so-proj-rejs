@@ -5,6 +5,10 @@ import src.globals as GLOBALS
 
 class Passenger(threading.Thread):
     def __init__(self, passenger_id):
+        """
+        Initializes passenger with a given passenger id.
+        :param passenger_id: ID of the passenger.
+        """
         super().__init__()
         self.passenger_id = passenger_id
         self.boarded = False

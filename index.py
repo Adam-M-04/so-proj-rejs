@@ -1,6 +1,6 @@
 import threading
-from src.objects.passenger import Passenger
 import src.globals as GLOBALS
+from src.objects.passenger import Passenger
 
 def main():
     num_passengers = 10
