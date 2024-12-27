@@ -1,0 +1,2 @@
+
+bridge_semaphore = None
