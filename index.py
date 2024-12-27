@@ -27,27 +27,26 @@ def simulation():
         GLOBALS.trips_count += 1
         print(GLOBALS.ship.boarded_passengers)
 
-
-
-    # Simulate passengers boarding the ship
-    for _ in range(5):
-        GLOBALS.ship.board_passenger()
-
-    # Start departure in a separate thread
-    def depart_ship():
-        GLOBALS.captain.depart()
-
-    departure_thread = threading.Thread(target=depart_ship)
-    departure_thread.start()
-
-    # Simulate clearing the bridge
-    time.sleep(2)
-    with GLOBALS.bridge_semaphore:
-        print("Manually clearing the bridge...")
-
-    departure_thread.join()
-
-    print("\nShipCaptain test completed.\n")
+    #
+    # # Simulate passengers boarding the ship
+    # for _ in range(5):
+    #     GLOBALS.ship.board_passenger()
+    #
+    # # Start departure in a separate thread
+    # def depart_ship():
+    #     GLOBALS.captain.depart()
+    #
+    # departure_thread = threading.Thread(target=depart_ship)
+    # departure_thread.start()
+    #
+    # # Simulate clearing the bridge
+    # time.sleep(2)
+    # with GLOBALS.bridge_semaphore:
+    #     print("Manually clearing the bridge...")
+    #
+    # departure_thread.join()
+    #
+    # print("\nShipCaptain test completed.\n")
 
 def main():
     print("Start symulacji...\n")
