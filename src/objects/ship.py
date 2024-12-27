@@ -37,5 +37,4 @@ class Ship:
         Checks if the ship is full.
         :return: True if the ship is full, False otherwise.
         """
-        with self.lock:
-            return self.onboard >= self.capacity
+        return self.onboard >= self.capacity
