@@ -1,9 +1,13 @@
 import threading
+import time
 
 from src.stop_boarding_passengers import stop_boarding_passengers
 
 
 class Ship:
+    cruise_duration = 8 # in seconds
+    cruise_in_progress = False
+
     def __init__(self, capacity):
         """
         Initializes the ship with a given passenger capacity.
@@ -42,3 +46,26 @@ class Ship:
         :return: True if the ship is full, False otherwise.
         """
         return len(self.boarded_passengers) >= self.capacity
+
+    def depart(self):
+        """
+        Initiates the departure process.
+        """
+        if len(self.boarded_passengers) == 0:
+            print("Statek pusty, rejs odwołany")
+            return
+
+        print("Statek wypływa z portu.")
+        self.cruise_in_progress = True
+        threading.Timer(Ship.cruise_duration, self.return_to_port).start()
+        return
+
+    def return_to_port(self):
+        """
+        Returns the ship to port.
+        """
+        if self.cruise_in_progress:
+            self.cruise_in_progress = False
+            print("Statek wrócił do portu.")
+            self.unload_all_passengers()
+        return

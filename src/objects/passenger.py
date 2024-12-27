@@ -3,7 +3,7 @@ import time
 import random
 import src.globals as GLOBALS
 
-class Passenger(threading.Thread):
+class Passenger:
     def __init__(self, passenger_id):
         """
         Initializes passenger with a given passenger id.
@@ -13,6 +13,7 @@ class Passenger(threading.Thread):
         self.passenger_id = passenger_id
         self.boarded = False
         self._stop_event = threading.Event()
+        self.thread = None
 
     def attempt_boarding(self):
         try:
@@ -35,7 +36,8 @@ class Passenger(threading.Thread):
 
     def start_boarding(self):
         self._stop_event.clear()
-        self.start()
+        self.thread = threading.Thread(target=self.run)
+        self.thread.start()
 
     def is_stopped(self):
         """
@@ -45,7 +47,7 @@ class Passenger(threading.Thread):
         return self._stop_event.is_set()
 
     def waiting_for_boarding(self):
-        return self.is_alive() and not self.is_stopped() and not self.boarded
+        return not self.is_stopped() and not self.boarded
 
     def run(self):
         if not self.boarded:
