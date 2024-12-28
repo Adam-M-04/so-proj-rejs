@@ -4,19 +4,22 @@ import random
 import src.globals as GLOBALS
 from enum import Enum
 
+from src.LogService import BaseLogger
+
+
 class PassengerStatus(Enum):
     AWAITING_BOARDING = 1
     BOARDED = 2
     ON_BRIDGE = 3
     FINISHED = 4
 
-class Passenger:
+class Passenger(BaseLogger):
     def __init__(self, passenger_id):
         """
         Initializes passenger with a given passenger id.
         :param passenger_id: ID of the passenger.
         """
-        super().__init__()
+        super().__init__("Pasażer")
         self.passenger_id = passenger_id
         self.status = PassengerStatus.AWAITING_BOARDING
         self._stop_event = threading.Event()
@@ -29,12 +32,12 @@ class Passenger:
 
     def attempt_boarding(self):
         try:
-            GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} czeka na wejście na mostek.")
+            self.log(f"Pasażer {self.passenger_id} czeka na wejście na mostek.")
             GLOBALS.bridge_semaphore.acquire()
 
             if not self.is_stopped():
                 self.status = PassengerStatus.ON_BRIDGE
-                GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} wchodzi na mostek.")
+                self.log(f"Pasażer {self.passenger_id} wchodzi na mostek.")
 
                 self.simulate_board_walk()
                 if not self.is_stopped() and GLOBALS.ship.board_passenger(self):
@@ -61,14 +64,14 @@ class Passenger:
 
     def offboarding(self):
         try:
-            GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} czeka na zejście ze statku.")
+            self.log(f"Pasażer {self.passenger_id} czeka na zejście ze statku.")
             GLOBALS.bridge_semaphore.acquire()
             self.status = PassengerStatus.ON_BRIDGE
 
             GLOBALS.ship.offboard_passenger(self)
             self.simulate_board_walk()
             self.status = PassengerStatus.FINISHED
-            GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} schodzi z mostku.")
+            self.log(f"Pasażer {self.passenger_id} schodzi z mostku.")
         finally:
             GLOBALS.bridge_semaphore.release()
 

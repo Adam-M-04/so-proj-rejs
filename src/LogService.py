@@ -1,5 +1,7 @@
 import os
 import datetime
+import src.globals as GLOBALS
+
 
 class LogService:
     def __init__(self, log_dir='logs'):
@@ -18,3 +20,10 @@ class LogService:
 
     def close(self):
         self.file.close()
+
+class BaseLogger:
+    def __init__(self, prefix: str):
+        self.prefix = prefix
+
+    def log(self, event):
+        GLOBALS.logger.log(f"[{self.prefix}] {event}")

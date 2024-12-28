@@ -1,16 +1,18 @@
 import threading
 import time
 import src.globals as GLOBALS
+from src.LogService import BaseLogger
 from src.objects.port_captain import PortCaptain
 from src.objects.ship import ShipStatus
 from src.stop_boarding_passengers import stop_boarding_passengers
 
 
-class ShipCaptain:
+class ShipCaptain(BaseLogger):
     def __init__(self):
         """
         Initializes the ShipCaptain with the ship and bridge semaphore.
         """
+        super().__init__("Kapitan statku")
         self.lock = threading.Lock()
         self.allow_departure = threading.Event()
 
@@ -21,10 +23,10 @@ class ShipCaptain:
         """
         with self.lock:
             if GLOBALS.bridge_semaphore._value == GLOBALS.bridge_capacity:
-                GLOBALS.logger.log("[Kapitan statku] Mostek jest pusty.")
+                self.log("Mostek jest pusty.")
                 return True
             else:
-                GLOBALS.logger.log("[Kapitan statku] Pasażerowie nadal na mostku.")
+                self.log("Pasażerowie nadal na mostku.")
                 return False
 
     def depart(self):
@@ -34,11 +36,11 @@ class ShipCaptain:
         """
         if GLOBALS.port_captain.signal_stop.is_set():
             return
-        GLOBALS.logger.log("[Kapitan statku] Przygotowanie do odpłynięcia.")
+        self.log("Przygotowanie do odpłynięcia.")
         while not self.check_bridge_empty():
             time.sleep(1)
 
-        GLOBALS.logger.log("[Kapitan statku] Statek gotowy do odpłynięcia.")
+        self.log("Statek gotowy do odpłynięcia.")
         self.allow_departure.set()
 
     def handle_signal(self, signal):
@@ -46,10 +48,10 @@ class ShipCaptain:
         Handles signals from the PortCaptain.
         :param signal: Signal type (e.g., 'DEPART_NOW').
         """
-        GLOBALS.logger.log(f"[Kapitan statku] Otrzymano sygnał {signal}.")
+        self.log(f"Otrzymano sygnał {signal}.")
         if signal == PortCaptain.DEPART_NOW_SIGNAL:
             if GLOBALS.ship.status != ShipStatus.BOARDING_IN_PROGRESS:
-                GLOBALS.logger.log("[Kapitan statku] Statek już odpłynął.")
+                self.log("Statek już odpłynął.")
                 return
 
             GLOBALS.ship.depart()
