@@ -1,5 +1,6 @@
 import threading
 import time
+import src.globals as GLOBALS
 
 from src.stop_boarding_passengers import stop_boarding_passengers
 
@@ -70,12 +71,14 @@ class Ship:
         """
         Initiates the departure process.
         """
+        print("\nCzas na odpłynięcie.", flush=True)
+        stop_boarding_passengers()
+        GLOBALS.captain.allow_departure.wait()
         if len(self.boarded_passengers) == 0:
             print("Statek pusty, rejs odwołany", flush=True)
             return
 
-        print("Statek wypływa z portu.", flush=True)
-        self.return_event.clear()
+        print(f"Statek wypływa z portu. {len(self.boarded_passengers)} pasażerów na pokładzie", flush=True)
         self.cruise_in_progress = True
         threading.Timer(Ship.cruise_duration, self.return_to_port).start()
         return
@@ -86,7 +89,7 @@ class Ship:
         """
         if self.cruise_in_progress:
             self.cruise_in_progress = False
-            print("Statek wrócił do portu.", flush=True)
+            print("\nStatek wrócił do portu.", flush=True)
             self.unload_all_passengers()
             self.return_event.set()
         return
