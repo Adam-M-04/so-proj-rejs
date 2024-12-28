@@ -21,10 +21,10 @@ class ShipCaptain:
         """
         with self.lock:
             if GLOBALS.bridge_semaphore._value == GLOBALS.bridge_capacity:
-                print("Mostek jest pusty.")
+                GLOBALS.logger.log("[Kapitan statku] Mostek jest pusty.")
                 return True
             else:
-                print("Pasażerowie nadal na mostku.")
+                GLOBALS.logger.log("[Kapitan statku] Pasażerowie nadal na mostku.")
                 return False
 
     def depart(self):
@@ -34,11 +34,11 @@ class ShipCaptain:
         """
         if GLOBALS.port_captain.signal_stop.is_set():
             return
-        print("Przygotowanie do odpłynięcia.")
+        GLOBALS.logger.log("[Kapitan statku] Przygotowanie do odpłynięcia.")
         while not self.check_bridge_empty():
             time.sleep(1)
 
-        print("Statek gotowy do odpłynięcia.")
+        GLOBALS.logger.log("[Kapitan statku] Statek gotowy do odpłynięcia.")
         self.allow_departure.set()
 
     def handle_signal(self, signal):
@@ -46,10 +46,10 @@ class ShipCaptain:
         Handles signals from the PortCaptain.
         :param signal: Signal type (e.g., 'DEPART_NOW').
         """
-        print(f"Kapitan statku: Otrzymano sygnał {signal}.")
+        GLOBALS.logger.log(f"[Kapitan statku] Otrzymano sygnał {signal}.")
         if signal == PortCaptain.DEPART_NOW_SIGNAL:
             if GLOBALS.ship.status != ShipStatus.BOARDING_IN_PROGRESS:
-                print("Statek już odpłynął.")
+                GLOBALS.logger.log("[Kapitan statku] Statek już odpłynął.")
                 return
 
             GLOBALS.ship.depart()

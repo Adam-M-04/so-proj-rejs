@@ -17,16 +17,16 @@ class PortCaptain:
         """
         Sends a signal to the ship captain to depart immediately.
         """
-        print("Kapitan portu: Wysyłanie sygnału DEPART_NOW.")
+        GLOBALS.logger.log("[Kapitan portu] Wysyłanie sygnału DEPART_NOW.")
         GLOBALS.captain.handle_signal(PortCaptain.DEPART_NOW_SIGNAL)
 
     def send_stop_signal(self):
         """
         Sends a signal to stop further cruises.
         """
-        print("Kapitan portu: Wysyłanie sygnału STOP_ALL_CRUISES.")
+        GLOBALS.logger.log("[Kapitan portu] Wysyłanie sygnału STOP_ALL_CRUISES.")
         if self.signal_stop.is_set():
-            print("KapitanPortu: Sygnał STOP_ALL_CRUISES został już wysłany.")
+            GLOBALS.logger.log("[Kapitan portu] Sygnał STOP_ALL_CRUISES został już wysłany.")
             return
         self.signal_stop.set()
         GLOBALS.captain.handle_signal(PortCaptain.STOP_ALL_CRUISES_SIGNAL)

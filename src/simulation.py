@@ -2,7 +2,7 @@ import threading
 import src.globals as GLOBALS
 
 def handle_trip():
-    print(f"\n#{GLOBALS.trips_count + 1} Rejs")
+    GLOBALS.logger.log(f"#{GLOBALS.trips_count + 1} Rejs")
     GLOBALS.captain.allow_departure.clear()
     GLOBALS.ship.prepare_for_trip()
 

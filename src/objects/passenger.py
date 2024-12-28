@@ -29,11 +29,12 @@ class Passenger:
 
     def attempt_boarding(self):
         try:
-            print(f"Pasażer {self.passenger_id} czeka na wejście na mostek.", flush=True)
+            GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} czeka na wejście na mostek.")
             GLOBALS.bridge_semaphore.acquire()
 
             if not self.is_stopped():
-                print(f"Pasażer {self.passenger_id} wchodzi na mostek.", flush=True)
+                self.status = PassengerStatus.ON_BRIDGE
+                GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} wchodzi na mostek.")
 
                 self.simulate_board_walk()
                 if not self.is_stopped() and GLOBALS.ship.board_passenger(self):
@@ -41,6 +42,8 @@ class Passenger:
 
         finally:
             GLOBALS.bridge_semaphore.release()
+            if self.status != PassengerStatus.BOARDED:
+                self.status = PassengerStatus.AWAITING_BOARDING
 
     def stop_boarding(self):
         self._stop_event.set()
@@ -58,13 +61,14 @@ class Passenger:
 
     def offboarding(self):
         try:
-            print(f"Pasażer {self.passenger_id} czeka na zejście ze statku.", flush=True)
+            GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} czeka na zejście ze statku.")
             GLOBALS.bridge_semaphore.acquire()
+            self.status = PassengerStatus.ON_BRIDGE
 
             GLOBALS.ship.offboard_passenger(self)
             self.simulate_board_walk()
             self.status = PassengerStatus.FINISHED
-            print(f"Pasażer {self.passenger_id} schodzi z mostku.", flush=True)
+            GLOBALS.logger.log(f"[Pasażer] Pasażer {self.passenger_id} schodzi z mostku.")
         finally:
             GLOBALS.bridge_semaphore.release()
 

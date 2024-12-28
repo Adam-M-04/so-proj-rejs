@@ -1,9 +1,12 @@
 import threading
 
+from src.LogService import LogService
 from src.objects.passenger import Passenger
 from src.objects.port_captain import PortCaptain
 from src.objects.ship import Ship
 from src.objects.ship_captain import ShipCaptain
+
+logger: LogService = LogService()
 
 bridge_capacity = 3
 bridge_semaphore: threading.Semaphore = threading.Semaphore(bridge_capacity)
