@@ -1,12 +1,13 @@
 import threading
 import time
 import src.globals as GLOBALS
+from src.objects.ship import ShipStatus
+
 
 class ShipCaptain:
     def __init__(self):
         """
         Initializes the ShipCaptain with the ship and bridge semaphore.
-        :param ship: Instance of the Ship class.
         """
         self.lock = threading.Lock()
         self.allow_departure = threading.Event()
@@ -41,6 +42,10 @@ class ShipCaptain:
         Handles signals from the PortCaptain.
         :param signal: Signal type (e.g., 'DEPART_NOW').
         """
-        # if signal == "DEPART_NOW":
-        #     print("Received signal: DEPART_NOW. Departing immediately!")
-        #     self.departure_signal.set()
+        if signal == "DEPART_NOW":
+            print("Otrzymano sygnał DEPART_NOW.")
+            if GLOBALS.ship.status != ShipStatus.BOARDING_IN_PROGRESS:
+                print("Statek już odpłynął.")
+                return
+
+            GLOBALS.ship.depart()

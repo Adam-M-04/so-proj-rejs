@@ -1,13 +1,18 @@
 import threading
-import time
 import src.globals as GLOBALS
+from enum import Enum
 
 from src.stop_boarding_passengers import stop_boarding_passengers
 
+class ShipStatus(Enum):
+    BOARDING_IN_PROGRESS = 1
+    DEPARTING = 2
+    IN_CRUISE = 3
+    OFFBOARDING = 4
 
 class Ship:
     cruise_duration = 5 # in seconds
-    cruise_in_progress = False
+    status = ShipStatus.BOARDING_IN_PROGRESS
 
     def __init__(self, capacity):
         """
@@ -71,15 +76,18 @@ class Ship:
         """
         Initiates the departure process.
         """
+        if self.status != ShipStatus.BOARDING_IN_PROGRESS:
+            return
         print("\nCzas na odpłynięcie.", flush=True)
         stop_boarding_passengers()
+        self.status = ShipStatus.DEPARTING
         GLOBALS.captain.allow_departure.wait()
         if len(self.boarded_passengers) == 0:
             print("Statek pusty, rejs odwołany", flush=True)
             return
 
         print(f"Statek wypływa z portu. {len(self.boarded_passengers)} pasażerów na pokładzie", flush=True)
-        self.cruise_in_progress = True
+        self.status = ShipStatus.IN_CRUISE
         threading.Timer(Ship.cruise_duration, self.return_to_port).start()
         return
 
@@ -87,9 +95,13 @@ class Ship:
         """
         Returns the ship to port.
         """
-        if self.cruise_in_progress:
-            self.cruise_in_progress = False
+        if self.status == ShipStatus.IN_CRUISE:
+            self.status = ShipStatus.OFFBOARDING
             print("\nStatek wrócił do portu.", flush=True)
             self.unload_all_passengers()
             self.return_event.set()
         return
+
+    def prepare_for_trip(self):
+        self.status = ShipStatus.BOARDING_IN_PROGRESS
+        self.return_event.clear()

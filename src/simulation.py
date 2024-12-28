@@ -3,10 +3,11 @@ import src.globals as GLOBALS
 
 def handle_trip():
     print(f"\n#{GLOBALS.trips_count + 1} Rejs")
+    GLOBALS.captain.allow_departure.clear()
+    GLOBALS.ship.prepare_for_trip()
+
     # Set timer for the ship to depart
     threading.Timer(GLOBALS.ship_departing_interval, GLOBALS.ship.depart).start()
-    GLOBALS.captain.allow_departure.clear()
-    GLOBALS.ship.return_event.clear()
 
     # Passengers go to the bridge
     for passenger in GLOBALS.passengers:
@@ -19,8 +20,9 @@ def handle_trip():
     # The bridge is clear, ths ship can depart
     GLOBALS.captain.depart()
 
-    # The ship has returned to port
+    # Wait for the ship to return to the port
     GLOBALS.ship.return_event.wait()
+    # Cycle is over
 
 def simulation():
     # Iterate each ship trip
