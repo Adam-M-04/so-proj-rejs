@@ -26,7 +26,7 @@ def handle_trip():
 
 def simulation():
     # Iterate each ship trip
-    while GLOBALS.trips_count < GLOBALS.max_trips:
+    while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set():
         handle_trip()
 
         GLOBALS.trips_count += 1

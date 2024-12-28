@@ -76,11 +76,11 @@ class Ship:
         """
         Initiates the departure process.
         """
-        if self.status != ShipStatus.BOARDING_IN_PROGRESS:
+        if self.status != ShipStatus.BOARDING_IN_PROGRESS or GLOBALS.port_captain.signal_stop.is_set():
             return
         print("\nCzas na odpłynięcie.", flush=True)
-        stop_boarding_passengers()
         self.status = ShipStatus.DEPARTING
+        stop_boarding_passengers()
         GLOBALS.captain.allow_departure.wait()
         if len(self.boarded_passengers) == 0:
             print("Statek pusty, rejs odwołany", flush=True)

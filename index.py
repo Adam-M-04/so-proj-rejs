@@ -1,9 +1,9 @@
 from src.simulation import simulation
 
 def main():
-    print("Start symulacji...\n")
+    print("Start symulacji...")
     simulation()
-    print("Koniec symulacji...\n")
+    print("\nKoniec symulacji...\n")
 
 
 if __name__ == "__main__":

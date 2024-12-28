@@ -1,7 +1,9 @@
 import threading
 import time
 import src.globals as GLOBALS
+from src.objects.port_captain import PortCaptain
 from src.objects.ship import ShipStatus
+from src.stop_boarding_passengers import stop_boarding_passengers
 
 
 class ShipCaptain:
@@ -30,6 +32,8 @@ class ShipCaptain:
         Initiates the departure process.
         Waits until the bridge is empty before departing.
         """
+        if GLOBALS.port_captain.signal_stop.is_set():
+            return
         print("Przygotowanie do odpłynięcia.")
         while not self.check_bridge_empty():
             time.sleep(1)
@@ -42,10 +46,17 @@ class ShipCaptain:
         Handles signals from the PortCaptain.
         :param signal: Signal type (e.g., 'DEPART_NOW').
         """
-        if signal == "DEPART_NOW":
-            print("Otrzymano sygnał DEPART_NOW.")
+        print(f"Kapitan statku: Otrzymano sygnał {signal}.")
+        if signal == PortCaptain.DEPART_NOW_SIGNAL:
             if GLOBALS.ship.status != ShipStatus.BOARDING_IN_PROGRESS:
                 print("Statek już odpłynął.")
                 return
 
             GLOBALS.ship.depart()
+        elif signal == PortCaptain.STOP_ALL_CRUISES_SIGNAL:
+            stop_boarding_passengers()
+            if GLOBALS.ship.status == ShipStatus.IN_CRUISE:
+                GLOBALS.ship.return_to_port()
+            else:
+                GLOBALS.ship.unload_all_passengers()
+                GLOBALS.ship.return_event.set()

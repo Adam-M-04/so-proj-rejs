@@ -47,6 +47,8 @@ class Passenger:
         # GLOBALS.bridge_semaphore.release()
 
     def start_boarding(self):
+        if self.is_boarded():
+            return
         self._stop_event.clear()
         self.thread = threading.Thread(target=self.run)
         self.thread.start()
