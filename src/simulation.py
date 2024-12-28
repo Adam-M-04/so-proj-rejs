@@ -5,6 +5,8 @@ from src.objects.ship import Ship
 from src.objects.ship_captain import ShipCaptain
 
 def handle_trip():
+    print(f"\n#{GLOBALS.trips_count + 1} Rejs")
+
     # Passengers go to the bridge
     for passenger in GLOBALS.passengers:
         passenger.start_boarding()
@@ -15,6 +17,9 @@ def handle_trip():
 
     # The bridge is clear, ths ship can depart
     GLOBALS.ship.depart()
+
+    # The ship has returned to port
+    GLOBALS.ship.return_event.wait()
 
 def simulation():
     GLOBALS.ship = Ship(GLOBALS.ship_capacity)
@@ -28,24 +33,3 @@ def simulation():
         handle_trip()
 
         GLOBALS.trips_count += 1
-
-    #
-    # # Simulate passengers boarding the ship
-    # for _ in range(5):
-    #     GLOBALS.ship.board_passenger()
-    #
-    # # Start departure in a separate thread
-    # def depart_ship():
-    #     GLOBALS.captain.depart()
-    #
-    # departure_thread = threading.Thread(target=depart_ship)
-    # departure_thread.start()
-    #
-    # # Simulate clearing the bridge
-    # time.sleep(2)
-    # with GLOBALS.bridge_semaphore:
-    #     print("Manually clearing the bridge...")
-    #
-    # departure_thread.join()
-    #
-    # print("\nShipCaptain test completed.\n")
