@@ -1,4 +1,6 @@
 import threading
+import time
+
 import src.globals as GLOBALS
 from enum import Enum
 
@@ -25,6 +27,7 @@ class Ship(BaseLogger):
         self.boarded_passengers = []
         self.lock = threading.Lock()
         self.return_event = threading.Event()
+        self.departure_time = None
 
     def board_passenger(self, passenger):
         """
@@ -88,6 +91,7 @@ class Ship(BaseLogger):
 
         self.log(f"Statek wypływa z portu. {len(self.boarded_passengers)} pasażerów na pokładzie")
         self.status = ShipStatus.IN_CRUISE
+        self.departure_time = time.time()
         threading.Timer(Ship.cruise_duration, self.return_to_port).start()
         return
 
@@ -100,8 +104,15 @@ class Ship(BaseLogger):
             self.log("Statek wrócił do portu.")
             self.unload_all_passengers()
             self.return_event.set()
+            self.departure_time = None
         return
 
     def prepare_for_trip(self):
         self.status = ShipStatus.BOARDING_IN_PROGRESS
         self.return_event.clear()
+
+    def get_trip_progress(self):
+        if self.status == ShipStatus.IN_CRUISE and self.departure_time:
+            elapsed_time = time.time() - self.departure_time
+            return min(elapsed_time, Ship.cruise_duration)
+        return 0

@@ -3,6 +3,7 @@ import time
 import threading
 import src.globals as GLOBALS
 from src.objects.passenger import PassengerStatus
+from src.objects.ship import ShipStatus
 
 os.environ['TERM'] = 'xterm-256color'
 
@@ -39,16 +40,17 @@ class SimulationDisplay:
         passengers_after_cruise = len([p for p in GLOBALS.passengers if p.status == PassengerStatus.FINISHED])
         total = GLOBALS.passengers_num
 
+        ship_trip_progress = GLOBALS.ship.get_trip_progress()
+
         print("\n=== PASAŻEROWIE W PORCIE ===")
-        print("Port (oczekujący na rejs):")
+        print("\nPort (oczekujący na rejs)")
         print(f"[{'X' * passengers_in_port}{' ' * (total - passengers_in_port)}] {passengers_in_port}/{total}")
 
-        print("Mostek:")
+        print("\nMostek")
         print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
 
-        print("Statek:")
+        print("\nStatek" + (f" (trwa rejs {ship_trip_progress:.1f}s/{GLOBALS.ship.cruise_duration}s)" if GLOBALS.ship.status == ShipStatus.IN_CRUISE else ""))
         print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
 
-        print("Port (po rejsie):")
+        print("\nPort (po rejsie)")
         print(f"[{'X' * passengers_after_cruise}{' ' * (total - passengers_after_cruise)}] {passengers_after_cruise}/{total}")
-        print("")

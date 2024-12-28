@@ -7,7 +7,7 @@ import src.globals as GLOBALS
 def main():
     GLOBALS.logger.log("Start symulacji...")
 
-    display = SimulationDisplay(refresh_interval=0.2)
+    display = SimulationDisplay(refresh_interval=0.1)
     display.start()
 
     simulation()
