@@ -1,8 +1,5 @@
 import threading
 import src.globals as GLOBALS
-from src.objects.passenger import Passenger
-from src.objects.ship import Ship
-from src.objects.ship_captain import ShipCaptain
 
 def handle_trip():
     print(f"\n#{GLOBALS.trips_count + 1} Rejs")
@@ -26,12 +23,6 @@ def handle_trip():
     GLOBALS.ship.return_event.wait()
 
 def simulation():
-    GLOBALS.ship = Ship(GLOBALS.ship_capacity)
-    GLOBALS.bridge_semaphore = threading.Semaphore(GLOBALS.bridge_capacity)
-    GLOBALS.captain = ShipCaptain()
-    GLOBALS.passengers = [Passenger(i + 1) for i in range(GLOBALS.passengers_num)]
-    GLOBALS.boarding_allowed = threading.Event()
-
     # Iterate each ship trip
     while GLOBALS.trips_count < GLOBALS.max_trips:
         handle_trip()
