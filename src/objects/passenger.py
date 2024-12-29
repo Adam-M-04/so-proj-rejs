@@ -31,6 +31,10 @@ class Passenger(BaseLogger):
         time.sleep(random.uniform(1, 3))
 
     def attempt_boarding(self):
+        """
+        Attempts to board the passenger onto the ship.
+        Acquires the bridge semaphore, simulates the boarding walk, and updates the passenger status.
+        """
         try:
             self.log(f"Pasażer {self.passenger_id} czeka na wejście na mostek.")
             GLOBALS.bridge_semaphore.acquire()
@@ -49,10 +53,16 @@ class Passenger(BaseLogger):
                 self.status = PassengerStatus.AWAITING_BOARDING
 
     def stop_boarding(self):
+        """
+        Stops the boarding process for the passenger by setting the stop event.
+        """
         self._stop_event.set()
         # GLOBALS.bridge_semaphore.release()
 
     def start_boarding(self):
+        """
+        Starts the boarding process for the passenger by clearing the stop event and starting a new thread.
+        """
         if self.is_boarded():
             return
         self._stop_event.clear()
@@ -60,9 +70,18 @@ class Passenger(BaseLogger):
         self.thread.start()
 
     def is_boarded(self):
+        """
+        Checks if the passenger has boarded the ship.
+
+        :return: True if the passenger has boarded, False otherwise.
+        """
         return self.status != PassengerStatus.AWAITING_BOARDING
 
     def offboarding(self):
+        """
+        Offboards the passenger from the ship.
+        Acquires the bridge semaphore, simulates the offboarding walk, and updates the passenger status.
+        """
         try:
             self.log(f"Pasażer {self.passenger_id} czeka na zejście ze statku.")
             GLOBALS.bridge_semaphore.acquire()
@@ -76,6 +95,9 @@ class Passenger(BaseLogger):
             GLOBALS.bridge_semaphore.release()
 
     def start_offboarding(self):
+        """
+        Starts the offboarding process for the passenger by clearing the stop event and starting a new thread.
+        """
         self._stop_event.clear()
         self.thread = threading.Thread(target=self.offboarding)
         self.thread.start()
@@ -88,8 +110,16 @@ class Passenger(BaseLogger):
         return self._stop_event.is_set()
 
     def waiting_for_boarding(self):
+        """
+        Checks if the passenger is waiting for boarding and not stopped.
+
+        :return: True if the passenger is waiting for boarding and not stopped, False otherwise.
+        """
         return not self.is_stopped() and not self.is_boarded()
 
     def run(self):
+        """
+        Runs the boarding process for the passenger.
+        """
         if not self.is_boarded():
             self.attempt_boarding()
