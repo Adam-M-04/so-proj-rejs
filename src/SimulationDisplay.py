@@ -41,12 +41,18 @@ class SimulationDisplay:
             self.update_display()
             time.sleep(self.refresh_interval)
 
+    @staticmethod
+    def clear():
+        """
+        Clears the terminal.
+        """
+        print("\033[H\033[J", end="")
+
     def update_display(self):
         """
         Clears the terminal and displays the updated simulation data.
         """
-        # Clear terminal
-        print("\033[H\033[J", end="")
+        self.clear()
 
         passengers_in_port = len([p for p in GLOBALS.passengers if p.status == PassengerStatus.AWAITING_BOARDING])
         passengers_on_bridge = len([p for p in GLOBALS.passengers if p.status == PassengerStatus.ON_BRIDGE])

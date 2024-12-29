@@ -5,6 +5,7 @@ import src.globals as GLOBALS
 from enum import Enum
 
 from src.LogService import BaseLogger
+from src.ReaderService import ReaderService
 from src.stop_boarding_passengers import stop_boarding_passengers
 
 class ShipStatus(Enum):
@@ -14,7 +15,6 @@ class ShipStatus(Enum):
     OFFBOARDING = 4
 
 class Ship(BaseLogger):
-    cruise_duration = 5 # in seconds
     status = ShipStatus.BOARDING_IN_PROGRESS
 
     def __init__(self, capacity):
@@ -23,6 +23,7 @@ class Ship(BaseLogger):
         :param capacity: Maximum number of passengers the ship can hold.
         """
         super().__init__("Statek")
+        self.cruise_duration = int(ReaderService.read_number(1, 3600, "Podaj ile sekund trwa rejs", 10))
         self.capacity = capacity
         self.boarded_passengers = []
         self.lock = threading.Lock()
@@ -92,12 +93,13 @@ class Ship(BaseLogger):
         GLOBALS.captain.allow_departure.wait()
         if len(self.boarded_passengers) == 0:
             self.log("Statek pusty, rejs odwołany")
+            self.return_event.set()
             return
 
         self.log(f"Statek wypływa z portu. {len(self.boarded_passengers)} pasażerów na pokładzie")
         self.status = ShipStatus.IN_CRUISE
         self.departure_time = time.time()
-        threading.Timer(Ship.cruise_duration, self.return_to_port).start()
+        threading.Timer(GLOBALS.ship.cruise_duration, self.return_to_port).start()
         return
 
     def return_to_port(self):
@@ -127,5 +129,5 @@ class Ship(BaseLogger):
         """
         if self.status == ShipStatus.IN_CRUISE and self.departure_time:
             elapsed_time = time.time() - self.departure_time
-            return min(elapsed_time, Ship.cruise_duration)
+            return min(elapsed_time, GLOBALS.ship.cruise_duration)
         return 0
