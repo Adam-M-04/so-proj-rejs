@@ -54,6 +54,11 @@ class Ship(BaseLogger):
                 self.log(f"Pasażer {passenger.passenger_id} schodzi na mostek. Obecny stan: {self.str_state()}.")
 
     def str_state(self):
+        """
+        Returns the current state of the ship in terms of boarded passengers.
+
+        :return: A string representing the number of boarded passengers and the ship's capacity. Example: "5/10"
+        """
         return f"{len(self.boarded_passengers)}/{self.capacity}"
 
     def unload_all_passengers(self):
@@ -108,10 +113,18 @@ class Ship(BaseLogger):
         return
 
     def prepare_for_trip(self):
+        """
+        Prepares the ship for a new trip by setting the status to boarding in progress and clearing the return event.
+        """
         self.status = ShipStatus.BOARDING_IN_PROGRESS
         self.return_event.clear()
 
     def get_trip_progress(self):
+        """
+        Gets the progress of the current trip.
+
+        :return: The elapsed time of the trip if in cruise, otherwise 0.
+        """
         if self.status == ShipStatus.IN_CRUISE and self.departure_time:
             elapsed_time = time.time() - self.departure_time
             return min(elapsed_time, Ship.cruise_duration)
