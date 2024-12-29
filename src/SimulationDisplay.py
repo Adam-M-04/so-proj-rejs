@@ -9,28 +9,42 @@ os.environ['TERM'] = 'xterm-256color'
 
 class SimulationDisplay:
     def __init__(self, refresh_interval: float = 1):
+        """
+        Initializes the SimulationDisplay with a given refresh interval.
+
+        :param refresh_interval: Time interval (in seconds) between display refreshes.
+        """
         self.thread = None
         self.refresh_interval = refresh_interval
         self.stopped = threading.Event()
 
     def start(self):
+        """
+        Starts the display thread.
+        """
         self.stopped.clear()
         self.thread = threading.Thread(target=self.display)
         self.thread.start()
 
     def stop(self):
+        """
+        Stops the display thread.
+        """
         self.stopped.set()
         self.thread.join()
 
     def display(self):
         """
-        Clear the terminal and display the updated simulation data.
+        Continuously updates the display until stopped.
         """
         while not self.stopped.is_set():
             self.update_display()
             time.sleep(self.refresh_interval)
 
     def update_display(self):
+        """
+        Clears the terminal and displays the updated simulation data.
+        """
         # Clear terminal
         print("\033[H\033[J", end="")
 
