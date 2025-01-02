@@ -122,5 +122,8 @@ class Passenger(BaseLogger):
         """
         Runs the boarding process for the passenger.
         """
-        if not self.is_boarded():
-            self.attempt_boarding()
+        try:
+            if not self.is_boarded():
+                self.attempt_boarding()
+        except Exception as e:
+            GLOBALS.logger.error(e)

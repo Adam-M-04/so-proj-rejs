@@ -4,6 +4,13 @@ import sys
 import select
 
 def read_input():
+    """
+    Reads input from the user to control the simulation.
+
+    Listens for specific key presses:
+    - 'r': Sends a stop signal to the port captain.
+    - 'd': Sends a depart now signal to the port captain.
+    """
     try:
         while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set():
             if sys.stdin in select.select([sys.stdin], [], [], 1)[0]:

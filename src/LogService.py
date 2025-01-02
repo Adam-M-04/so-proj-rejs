@@ -31,6 +31,15 @@ class LogService:
         self.file.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {event}\n")
         self.file.flush()
 
+    def error(self, error):
+        """
+        Logs an error event with a timestamp.
+
+        :param error: The error event message to log.
+        """
+        self.file.write(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - [ERROR] {error}\n")
+        self.file.flush()
+
     def close(self):
         """
         Closes the log file.

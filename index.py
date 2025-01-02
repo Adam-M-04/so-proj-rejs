@@ -19,7 +19,8 @@ def main():
         sleep(1)
         display.stop()
     except Exception as e:
-        GLOBALS.logger.log(f"Wystąpił błąd w trakcie symulacji: {e}")
+        print("Wystąpił błąd w trakcie trwania symulacji...")
+        GLOBALS.logger.error(e)
         GLOBALS.logger.close()
 
 if __name__ == "__main__":
