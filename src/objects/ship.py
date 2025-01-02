@@ -131,3 +131,17 @@ class Ship(BaseLogger):
             elapsed_time = time.time() - self.departure_time
             return min(elapsed_time, GLOBALS.ship.cruise_duration)
         return 0
+
+    def print_ship_status(self):
+        """
+        Prints the current status of the ship.
+        """
+        if self.status == ShipStatus.IN_CRUISE:
+            progress = self.get_trip_progress()
+            return f"trwa rejs {progress:.1f}s/{self.cruise_duration}s"
+        if self.status == ShipStatus.BOARDING_IN_PROGRESS:
+            return "załadunek pasażerów"
+        if self.status == ShipStatus.DEPARTING:
+            return "wypływanie w rejs"
+        if self.status == ShipStatus.OFFBOARDING:
+            return "pasażerowie wysiadają"

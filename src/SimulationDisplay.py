@@ -69,7 +69,7 @@ class SimulationDisplay:
         print("\nMostek")
         print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
 
-        print("\nStatek" + (f" (trwa rejs {ship_trip_progress:.1f}s/{GLOBALS.ship.cruise_duration}s)" if GLOBALS.ship.status == ShipStatus.IN_CRUISE else ""))
+        print(f"\nStatek ({GLOBALS.ship.print_ship_status()})")
         print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
 
         print("\nPort (po rejsie)")
