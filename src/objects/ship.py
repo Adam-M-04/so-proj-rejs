@@ -62,13 +62,14 @@ class Ship(BaseLogger):
         """
         return f"{len(self.boarded_passengers)}/{self.capacity}"
 
-    def unload_all_passengers(self):
+    def unload_all_passengers(self, trip_success=True):
         """
         Removes all passengers from the ship.
         """
         self.log(f"Wszyscy pasażerowie wysiadają.")
         tmp_boarded = self.boarded_passengers.copy()
         for passenger in tmp_boarded:
+            passenger.trip_completed = trip_success
             passenger.start_offboarding()
 
         for passenger in tmp_boarded:
@@ -142,6 +143,6 @@ class Ship(BaseLogger):
         if self.status == ShipStatus.BOARDING_IN_PROGRESS:
             return "załadunek pasażerów"
         if self.status == ShipStatus.DEPARTING:
-            return "wypływanie w rejs"
+            return "czas odpływać"
         if self.status == ShipStatus.OFFBOARDING:
             return "pasażerowie wysiadają"

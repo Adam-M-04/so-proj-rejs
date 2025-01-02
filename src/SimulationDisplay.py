@@ -48,19 +48,23 @@ class SimulationDisplay:
         """
         print("\033[H\033[J", end="")
 
+    def print_actions(self):
+        print("\n=== AKCJE ===")
+        print("r + enter - zatrzymaj rejs")
+        print("d + enter - natychmiastowy odpływ")
+
     def update_display(self):
         """
         Clears the terminal and displays the updated simulation data.
         """
         self.clear()
+        self.print_actions()
 
         passengers_in_port = len([p for p in GLOBALS.passengers if p.status == PassengerStatus.AWAITING_BOARDING])
         passengers_on_bridge = len([p for p in GLOBALS.passengers if p.status == PassengerStatus.ON_BRIDGE])
         passengers_on_ship = len([p for p in GLOBALS.passengers if p.status == PassengerStatus.BOARDED])
         passengers_after_cruise = len([p for p in GLOBALS.passengers if p.status == PassengerStatus.FINISHED])
         total = GLOBALS.passengers_num
-
-        ship_trip_progress = GLOBALS.ship.get_trip_progress()
 
         print("\n=== PASAŻEROWIE W PORCIE ===")
         print("\nPort (oczekujący na rejs)")
@@ -69,7 +73,7 @@ class SimulationDisplay:
         print("\nMostek")
         print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
 
-        print(f"\nStatek ({GLOBALS.ship.print_ship_status()})")
+        print(f"\nStatek ({GLOBALS.ship.print_ship_status()})" + (" [SYGNAŁ POWROTU]" if GLOBALS.port_captain.signal_stop.is_set() else ""))
         print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
 
         print("\nPort (po rejsie)")

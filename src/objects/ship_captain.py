@@ -57,8 +57,8 @@ class ShipCaptain(BaseLogger):
             GLOBALS.ship.depart()
         elif signal == PortCaptain.STOP_ALL_CRUISES_SIGNAL:
             stop_boarding_passengers()
-            if GLOBALS.ship.status == ShipStatus.IN_CRUISE:
-                GLOBALS.ship.return_to_port()
-            else:
-                GLOBALS.ship.unload_all_passengers()
+            if GLOBALS.ship.status != ShipStatus.IN_CRUISE:
+                for passenger in GLOBALS.passengers:
+                    passenger.thread.join()
+                GLOBALS.ship.unload_all_passengers(False)
                 GLOBALS.ship.return_event.set()

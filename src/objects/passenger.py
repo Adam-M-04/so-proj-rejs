@@ -21,6 +21,7 @@ class Passenger(BaseLogger):
         """
         super().__init__("Pasażer")
         self.passenger_id = passenger_id
+        self.trip_completed = False
         self.status = PassengerStatus.AWAITING_BOARDING
         self._stop_event = threading.Event()
         self.thread = None
@@ -89,7 +90,7 @@ class Passenger(BaseLogger):
 
             GLOBALS.ship.offboard_passenger(self)
             self.simulate_board_walk()
-            self.status = PassengerStatus.FINISHED
+            self.status = PassengerStatus.FINISHED if self.trip_completed else PassengerStatus.AWAITING_BOARDING
             self.log(f"Pasażer {self.passenger_id} schodzi z mostku.")
         finally:
             GLOBALS.bridge_semaphore.release()
