@@ -47,7 +47,8 @@ class Passenger(BaseLogger):
                 self.simulate_board_walk()
                 if not self.is_stopped() and GLOBALS.ship.board_passenger(self):
                     self.status = PassengerStatus.BOARDED
-
+        except Exception as e:
+            GLOBALS.logger.error(e)
         finally:
             GLOBALS.bridge_semaphore.release()
             if self.status != PassengerStatus.BOARDED:
@@ -64,11 +65,14 @@ class Passenger(BaseLogger):
         """
         Starts the boarding process for the passenger by clearing the stop event and starting a new thread.
         """
-        if self.is_boarded():
-            return
-        self._stop_event.clear()
-        self.thread = threading.Thread(target=self.run)
-        self.thread.start()
+        try:
+            if self.is_boarded():
+                return
+            self._stop_event.clear()
+            self.thread = threading.Thread(target=self.run)
+            self.thread.start()
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def is_boarded(self):
         """
@@ -92,6 +96,8 @@ class Passenger(BaseLogger):
             self.simulate_board_walk()
             self.status = PassengerStatus.FINISHED if self.trip_completed else PassengerStatus.AWAITING_BOARDING
             self.log(f"Pasażer {self.passenger_id} schodzi z mostku.")
+        except Exception as e:
+            GLOBALS.logger.error(e)
         finally:
             GLOBALS.bridge_semaphore.release()
 
@@ -99,9 +105,12 @@ class Passenger(BaseLogger):
         """
         Starts the offboarding process for the passenger by clearing the stop event and starting a new thread.
         """
-        self._stop_event.clear()
-        self.thread = threading.Thread(target=self.offboarding)
-        self.thread.start()
+        try:
+            self._stop_event.clear()
+            self.thread = threading.Thread(target=self.offboarding)
+            self.thread.start()
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def is_stopped(self):
         """

@@ -34,31 +34,37 @@ class ShipCaptain(BaseLogger):
         Initiates the departure process.
         Waits until the bridge is empty before departing.
         """
-        if GLOBALS.port_captain.signal_stop.is_set():
-            return
-        self.log("Przygotowanie do odpłynięcia.")
-        while not self.check_bridge_empty():
-            time.sleep(1)
+        try:
+            if GLOBALS.port_captain.signal_stop.is_set():
+                return
+            self.log("Przygotowanie do odpłynięcia.")
+            while not self.check_bridge_empty():
+                time.sleep(1)
 
-        self.log("Statek gotowy do odpłynięcia.")
-        self.allow_departure.set()
+            self.log("Statek gotowy do odpłynięcia.")
+            self.allow_departure.set()
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def handle_signal(self, signal):
         """
         Handles signals from the PortCaptain.
         :param signal: Signal type (e.g., 'DEPART_NOW').
         """
-        self.log(f"Otrzymano sygnał {signal}.")
-        if signal == PortCaptain.DEPART_NOW_SIGNAL:
-            if GLOBALS.ship.status != ShipStatus.BOARDING_IN_PROGRESS:
-                self.log("Statek już odpłynął.")
-                return
+        try:
+            self.log(f"Otrzymano sygnał {signal}.")
+            if signal == PortCaptain.DEPART_NOW_SIGNAL:
+                if GLOBALS.ship.status != ShipStatus.BOARDING_IN_PROGRESS:
+                    self.log("Statek już odpłynął.")
+                    return
 
-            GLOBALS.ship.depart()
-        elif signal == PortCaptain.STOP_ALL_CRUISES_SIGNAL:
-            stop_boarding_passengers()
-            if GLOBALS.ship.status != ShipStatus.IN_CRUISE:
-                for passenger in GLOBALS.passengers:
-                    passenger.thread.join()
-                GLOBALS.ship.unload_all_passengers(False)
-                GLOBALS.ship.return_event.set()
+                GLOBALS.ship.depart()
+            elif signal == PortCaptain.STOP_ALL_CRUISES_SIGNAL:
+                stop_boarding_passengers()
+                if GLOBALS.ship.status != ShipStatus.IN_CRUISE:
+                    for passenger in GLOBALS.passengers:
+                        passenger.thread.join()
+                    GLOBALS.ship.unload_all_passengers(False)
+                    GLOBALS.ship.return_event.set()
+        except Exception as e:
+            GLOBALS.logger.error(e)

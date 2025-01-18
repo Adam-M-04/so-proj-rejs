@@ -19,6 +19,8 @@ def read_input():
                     GLOBALS.port_captain.send_stop_signal()
                 elif char == 'd':
                     GLOBALS.port_captain.send_depart_now_signal()
+    except Exception as e:
+        GLOBALS.logger.error(e)
     finally:
         return
 
@@ -54,11 +56,13 @@ def simulation():
    Runs the simulation of ship trips until the maximum number of trips is reached or a stop signal is received.
    Handles the boarding, departure, and return of the ship for each trip.
    """
+    try:
+        input_thread = threading.Thread(target=read_input)
+        input_thread.start()
+        # Iterate each ship trip
+        while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set():
+            handle_trip()
 
-    input_thread = threading.Thread(target=read_input)
-    input_thread.start()
-    # Iterate each ship trip
-    while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set():
-        handle_trip()
-
-        GLOBALS.trips_count += 1
+            GLOBALS.trips_count += 1
+    except Exception as e:
+        GLOBALS.logger.error(e)

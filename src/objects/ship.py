@@ -35,24 +35,30 @@ class Ship(BaseLogger):
         Attempts to add a passenger to the ship.
         :return: True if boarding was successful, False if the ship is full.
         """
-        with self.lock:
-            if not self.is_full():
-                self.boarded_passengers.append(passenger)
-                self.log(f"Pasażer {passenger.passenger_id} wszedł na statek. Obecny stan: {self.str_state()}.")
-                return True
-            else:
-                self.log("Statek jest pełny. Pasażer nie może wejść.")
-                stop_boarding_passengers()
-                return False
+        try:
+            with self.lock:
+                if not self.is_full():
+                    self.boarded_passengers.append(passenger)
+                    self.log(f"Pasażer {passenger.passenger_id} wszedł na statek. Obecny stan: {self.str_state()}.")
+                    return True
+                else:
+                    self.log("Statek jest pełny. Pasażer nie może wejść.")
+                    stop_boarding_passengers()
+                    return False
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def offboard_passenger(self, passenger):
         """
         Remove a passenger from the ship.
         """
-        with self.lock:
-            if passenger in self.boarded_passengers:
-                self.boarded_passengers.remove(passenger)
-                self.log(f"Pasażer {passenger.passenger_id} schodzi na mostek. Obecny stan: {self.str_state()}.")
+        try:
+            with self.lock:
+                if passenger in self.boarded_passengers:
+                    self.boarded_passengers.remove(passenger)
+                    self.log(f"Pasażer {passenger.passenger_id} schodzi na mostek. Obecny stan: {self.str_state()}.")
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def str_state(self):
         """
@@ -66,14 +72,17 @@ class Ship(BaseLogger):
         """
         Removes all passengers from the ship.
         """
-        self.log(f"Wszyscy pasażerowie wysiadają.")
-        tmp_boarded = self.boarded_passengers.copy()
-        for passenger in tmp_boarded:
-            passenger.trip_completed = trip_success
-            passenger.start_offboarding()
+        try:
+            self.log(f"Wszyscy pasażerowie wysiadają.")
+            tmp_boarded = self.boarded_passengers.copy()
+            for passenger in tmp_boarded:
+                passenger.trip_completed = trip_success
+                passenger.start_offboarding()
 
-        for passenger in tmp_boarded:
-            passenger.thread.join()
+            for passenger in tmp_boarded:
+                passenger.thread.join()
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def is_full(self):
         """
@@ -86,41 +95,50 @@ class Ship(BaseLogger):
         """
         Initiates the departure process.
         """
-        if self.status != ShipStatus.BOARDING_IN_PROGRESS or GLOBALS.port_captain.signal_stop.is_set():
-            return
-        self.log("Czas na odpłynięcie.")
-        self.status = ShipStatus.DEPARTING
-        stop_boarding_passengers()
-        GLOBALS.captain.allow_departure.wait()
-        if len(self.boarded_passengers) == 0:
-            self.log("Statek pusty, rejs odwołany")
-            self.return_event.set()
-            return
+        try:
+            if self.status != ShipStatus.BOARDING_IN_PROGRESS or GLOBALS.port_captain.signal_stop.is_set():
+                return
+            self.log("Czas na odpłynięcie.")
+            self.status = ShipStatus.DEPARTING
+            stop_boarding_passengers()
+            GLOBALS.captain.allow_departure.wait()
+            if len(self.boarded_passengers) == 0:
+                self.log("Statek pusty, rejs odwołany")
+                self.return_event.set()
+                return
 
-        self.log(f"Statek wypływa z portu. {len(self.boarded_passengers)} pasażerów na pokładzie")
-        self.status = ShipStatus.IN_CRUISE
-        self.departure_time = time.time()
-        threading.Timer(GLOBALS.ship.cruise_duration, self.return_to_port).start()
-        return
+            self.log(f"Statek wypływa z portu. {len(self.boarded_passengers)} pasażerów na pokładzie")
+            self.status = ShipStatus.IN_CRUISE
+            self.departure_time = time.time()
+            threading.Timer(GLOBALS.ship.cruise_duration, self.return_to_port).start()
+            return
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def return_to_port(self):
         """
         Returns the ship to port.
         """
-        if self.status == ShipStatus.IN_CRUISE:
-            self.status = ShipStatus.OFFBOARDING
-            self.log("Statek wrócił do portu.")
-            self.unload_all_passengers()
-            self.return_event.set()
-            self.departure_time = None
-        return
+        try:
+            if self.status == ShipStatus.IN_CRUISE:
+                self.status = ShipStatus.OFFBOARDING
+                self.log("Statek wrócił do portu.")
+                self.unload_all_passengers()
+                self.return_event.set()
+                self.departure_time = None
+            return
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def prepare_for_trip(self):
         """
         Prepares the ship for a new trip by setting the status to boarding in progress and clearing the return event.
         """
-        self.status = ShipStatus.BOARDING_IN_PROGRESS
-        self.return_event.clear()
+        try:
+            self.status = ShipStatus.BOARDING_IN_PROGRESS
+            self.return_event.clear()
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def get_trip_progress(self):
         """
@@ -128,10 +146,13 @@ class Ship(BaseLogger):
 
         :return: The elapsed time of the trip if in cruise, otherwise 0.
         """
-        if self.status == ShipStatus.IN_CRUISE and self.departure_time:
-            elapsed_time = time.time() - self.departure_time
-            return min(elapsed_time, GLOBALS.ship.cruise_duration)
-        return 0
+        try:
+            if self.status == ShipStatus.IN_CRUISE and self.departure_time:
+                elapsed_time = time.time() - self.departure_time
+                return min(elapsed_time, GLOBALS.ship.cruise_duration)
+            return 0
+        except Exception as e:
+            GLOBALS.logger.error(e)
 
     def print_ship_status(self):
         """

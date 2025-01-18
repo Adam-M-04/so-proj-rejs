@@ -26,9 +26,12 @@ class PortCaptain(BaseLogger):
         """
         Sends a signal to stop further cruises.
         """
-        self.log("Wysyłanie sygnału STOP_ALL_CRUISES.")
-        if self.signal_stop.is_set():
-            self.log("Sygnał STOP_ALL_CRUISES został już wysłany.")
-            return
-        self.signal_stop.set()
-        GLOBALS.captain.handle_signal(PortCaptain.STOP_ALL_CRUISES_SIGNAL)
+        try:
+            self.log("Wysyłanie sygnału STOP_ALL_CRUISES.")
+            if self.signal_stop.is_set():
+                self.log("Sygnał STOP_ALL_CRUISES został już wysłany.")
+                return
+            self.signal_stop.set()
+            GLOBALS.captain.handle_signal(PortCaptain.STOP_ALL_CRUISES_SIGNAL)
+        except Exception as e:
+            GLOBALS.logger.error(e)
