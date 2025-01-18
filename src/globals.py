@@ -9,18 +9,20 @@ from src.objects.ship_captain import ShipCaptain
 
 logger: LogService = LogService()
 
-ship_capacity = int(ReaderService.read_number(1, 600, "Podaj ile pasażerów mieści się na statku", 5))
-ship_departing_interval = int(ReaderService.read_number(1, 3600, "Podaj co ile sekund odpływa statek", 8))
+use_defaults = ReaderService.read_boolean("Czy chcesz użyć domyślnych parametrów symulacji?", 1)
+
+ship_capacity = 5 if use_defaults else int(ReaderService.read_number(1, 600, "Podaj ile pasażerów mieści się na statku", 5))
+ship_departing_interval = 8 if use_defaults else int(ReaderService.read_number(1, 3600, "Podaj co ile sekund odpływa statek", 8))
 ship: Ship = Ship(ship_capacity)
 
-bridge_capacity = int(ReaderService.read_number(1, ship_capacity, "Podaj maksymalną liczbę pasażerów jednocześnie przebywających na mostku", min(3, ship_capacity)))
+bridge_capacity = min(3, ship_capacity) if use_defaults else int(ReaderService.read_number(1, ship_capacity, "Podaj maksymalną liczbę pasażerów jednocześnie przebywających na mostku", min(3, ship_capacity)))
 bridge_semaphore: threading.Semaphore = threading.Semaphore(bridge_capacity)
 
-passengers_num = int(ReaderService.read_number(0, 10000, "Podaj ile pasażerów czeka dziś na rejs", 12))
+passengers_num = 12 if use_defaults else int(ReaderService.read_number(0, 10000, "Podaj ile pasażerów czeka dziś na rejs", 12))
 passengers: list[Passenger] = [Passenger(i + 1) for i in range(passengers_num)]
 
 trips_count = 0
-max_trips = int(ReaderService.read_number(1, 100, "Podaj ile maksymalnie kursów może zrobić dzisiaj statek", 3))
+max_trips = 3 if use_defaults else int(ReaderService.read_number(1, 100, "Podaj ile maksymalnie kursów może zrobić dzisiaj statek", 3))
 
 captain: ShipCaptain = ShipCaptain()
 port_captain: PortCaptain = PortCaptain()

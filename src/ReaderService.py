@@ -20,3 +20,25 @@ class ReaderService:
                     print(f"Podałeś liczbę spoza zakresu <{min_value} - {max_value}>.")
             except ValueError:
                 print("Niepoprawna wartość. Wprowadź liczbę.")
+
+    @staticmethod
+    def read_boolean(message: str, default_value: float) -> float:
+        """
+        Reads a boolean from the user, with default value.
+
+        :param message: The message to display to the user.
+        :param default_value: The default value.
+        :return: The boolean value provided by the user.
+        """
+        print("\033[H\033[J", end="")
+        while True:
+            try:
+                input_val = input(f"{message} <T - tak/N - nie> [domyślnie {'Tak' if default_value else 'Nie'}]: ").lower()
+                if input_val == "t":
+                    return True
+                elif input_val == "n":
+                    return False
+                else:
+                    print(f"Podałeś niepoprawną wartość. Wprowadź 'T' lub 'N'.")
+            except ValueError:
+                print("Niepoprawna wartość.")

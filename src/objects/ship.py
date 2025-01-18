@@ -23,7 +23,7 @@ class Ship(BaseLogger):
         :param capacity: Maximum number of passengers the ship can hold.
         """
         super().__init__("Statek")
-        self.cruise_duration = int(ReaderService.read_number(1, 3600, "Podaj ile sekund trwa rejs", 10))
+        self.cruise_duration = 10 if GLOBALS.use_defaults else int(ReaderService.read_number(1, 3600, "Podaj ile sekund trwa rejs", 10))
         self.capacity = capacity
         self.boarded_passengers = []
         self.lock = threading.Lock()
