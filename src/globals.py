@@ -1,11 +1,9 @@
-import threading
-
 # from src.LogService import LogService
 
 # from src.LogService import LogService
 # from src.ReaderService import ReaderService
 # from src.objects.passenger import Passenger
-# from src.objects.port_captain import PortCaptain
+from src.objects.port_captain import PortCaptain
 # from src.objects.ship import Ship
 # from src.objects.ship_captain import ShipCaptain
 #
@@ -46,3 +44,5 @@ ship_capacity = 5
 bridge_capacity = 3
 ship_departing_interval = 7
 trip_time = 4
+
+port_captain: PortCaptain = PortCaptain()

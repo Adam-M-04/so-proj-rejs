@@ -1,10 +1,10 @@
-import threading
+import multiprocessing
+import sys
+import select
 
 import src.globals as GLOBALS
-from src.LogService import BaseLogger
 
-
-class PortCaptain(BaseLogger):
+class PortCaptain:
     DEPART_NOW_SIGNAL = "DEPART_NOW"
     STOP_ALL_CRUISES_SIGNAL = "STOP_ALL_CRUISES"
 
@@ -12,14 +12,13 @@ class PortCaptain(BaseLogger):
         """
         Initializes the PortCaptain with a reference to the ShipCaptain.
         """
-        super().__init__("Kapitan portu")
-        self.signal_stop = threading.Event()
+        self.signal_stop = multiprocessing.Event()
 
     def send_depart_now_signal(self):
         """
         Sends a signal to the ship captain to depart immediately.
         """
-        self.log("Wysyłanie sygnału DEPART_NOW.")
+        GLOBALS.logger.log("Wysyłanie sygnału DEPART_NOW.")
         GLOBALS.captain.handle_signal(PortCaptain.DEPART_NOW_SIGNAL)
 
     def send_stop_signal(self):
@@ -27,11 +26,32 @@ class PortCaptain(BaseLogger):
         Sends a signal to stop further cruises.
         """
         try:
-            self.log("Wysyłanie sygnału STOP_ALL_CRUISES.")
+            GLOBALS.logger.log("Wysyłanie sygnału STOP_ALL_CRUISES.")
             if self.signal_stop.is_set():
-                self.log("Sygnał STOP_ALL_CRUISES został już wysłany.")
+                GLOBALS.logger.log("Sygnał STOP_ALL_CRUISES został już wysłany.")
                 return
             self.signal_stop.set()
-            GLOBALS.captain.handle_signal(PortCaptain.STOP_ALL_CRUISES_SIGNAL)
         except Exception as e:
             GLOBALS.logger.error(e)
+
+    @staticmethod
+    def read_input():
+        """
+        Reads input from the user to control the simulation.
+
+        Listens for specific key presses:
+        - 'r': Sends a stop signal to the port captain.
+        - 'd': Sends a depart now signal to the port captain.
+        """
+        try:
+            while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set():
+                if sys.stdin in select.select([sys.stdin], [], [], 1)[0]:
+                    char = sys.stdin.read(1)
+                    if char == 'r':
+                        GLOBALS.port_captain.send_stop_signal()
+                    elif char == 'd':
+                        GLOBALS.port_captain.send_depart_now_signal()
+        except Exception as e:
+            GLOBALS.logger.error(e)
+        finally:
+            return
