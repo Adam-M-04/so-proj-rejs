@@ -1,70 +1,45 @@
-import threading
 import time
-import src.globals as GLOBALS
-from src.LogService import BaseLogger
-from src.objects.port_captain import PortCaptain
-from src.objects.ship import ShipStatus
-from src.stop_boarding_passengers import stop_boarding_passengers
+
+from src.LogService import LogService
 
 
-class ShipCaptain(BaseLogger):
-    def __init__(self):
-        """
-        Initializes the ShipCaptain with the ship and bridge semaphore.
-        """
-        super().__init__("Kapitan statku")
-        self.lock = threading.Lock()
-        self.allow_departure = threading.Event()
+def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interval, boarding_allowed, passengers_on_bridge, bridge_direction, bridge_semaphore, bridge_cleared, trips_count, logger_queue, signal_stop, bridge_close):
+    """Board passengers on the ship and make trips."""
+    while trips_count.value < max_trips and not signal_stop.is_set():
+        LogService.log_static(f"Rejs nr {trips_count.value + 1}", logger_queue)
+        start_time = time.time()
+        bridge_direction.value = True
+        boarding_allowed.value = True
 
-    def check_bridge_empty(self):
-        """
-        Checks if the bridge is empty.
-        :return: True if the bridge is empty, False otherwise.
-        """
-        with self.lock:
-            if GLOBALS.bridge_semaphore._value == GLOBALS.bridge_capacity:
-                self.log("Mostek jest pusty.")
-                return True
-            else:
-                self.log("Pasażerowie nadal na mostku.")
-                return False
+        while (time.time() - start_time) < ship_departing_interval:
+            time.sleep(0.1)
 
-    def depart(self):
-        """
-        Initiates the departure process.
-        Waits until the bridge is empty before departing.
-        """
-        try:
-            if GLOBALS.port_captain.signal_stop.is_set():
-                return
-            self.log("Przygotowanie do odpłynięcia.")
-            while not self.check_bridge_empty():
-                time.sleep(1)
+        boarding_allowed.value = False
+        LogService.log_static("Czas na wypłynięcie statku", logger_queue)
 
-            self.log("Statek gotowy do odpłynięcia.")
-            self.allow_departure.set()
-        except Exception as e:
-            GLOBALS.logger.error(e)
+        bridge_cleared.wait()
 
-    def handle_signal(self, signal):
-        """
-        Handles signals from the PortCaptain.
-        :param signal: Signal type (e.g., 'DEPART_NOW').
-        """
-        try:
-            self.log(f"Otrzymano sygnał {signal}.")
-            if signal == PortCaptain.DEPART_NOW_SIGNAL:
-                if GLOBALS.ship.status != ShipStatus.BOARDING_IN_PROGRESS:
-                    self.log("Statek już odpłynął.")
-                    return
+        LogService.log_static("Mostek pusty, statek gotowy do odpłynięcia", logger_queue)
 
-                GLOBALS.ship.depart()
-            elif signal == PortCaptain.STOP_ALL_CRUISES_SIGNAL:
-                stop_boarding_passengers()
-                if GLOBALS.ship.status != ShipStatus.IN_CRUISE:
-                    for passenger in GLOBALS.passengers:
-                        passenger.thread.join()
-                    GLOBALS.ship.unload_all_passengers(False)
-                    GLOBALS.ship.return_event.set()
-        except Exception as e:
-            GLOBALS.logger.error(e)
+        if signal_stop.is_set():
+            LogService.log_static("Rejs odwołany.", logger_queue)
+        elif len(passengers_on_ship) > 0:
+            LogService.log_static(f"Statek odpływa z {len(passengers_on_ship)} pasażerami na pokładzie.", logger_queue)
+            time.sleep(trip_time)
+            LogService.log_static("Statek powrócił do portu", logger_queue)
+        else:
+            LogService.log_static("Brak pasażerów na statku, rejs odwołany.", logger_queue)
+
+        bridge_direction.value = False
+        while len(passengers_on_ship) > 0:
+            bridge_semaphore.acquire()
+            passenger_id = passengers_on_ship.pop(0)
+            passengers_on_bridge.put(passenger_id)
+            LogService.log_static(f"Pasażer {passenger_id} schodzi na mostek.", logger_queue)
+            time.sleep(0.1)
+
+        bridge_cleared.wait()
+
+        trips_count.value += 1
+
+    bridge_close.set()

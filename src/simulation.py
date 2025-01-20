@@ -1,12 +1,10 @@
 import multiprocessing
-import threading
 import src.globals as GLOBALS
 
 from src.SimulationDisplay import SimulationDisplay
 from src.objects.Bridge import enter_bridge
 from src.objects.passenger import passenger
-from src.objects.port_captain import PortCaptain
-from src.objects.ship import ship
+from src.objects.ship_captain import ship_captain
 
 
 def simulation(display: SimulationDisplay):
@@ -38,7 +36,7 @@ def simulation(display: SimulationDisplay):
     processes.append(multiprocessing.Process(target=enter_bridge, args=(
         passengers_on_bridge, GLOBALS.port_captain.boarding_allowed, passengers_on_ship, GLOBALS.ship_capacity, ship_lock, passengers_in_port,
         bridge_semaphore, bridge_direction, passengers_after_trip, passengers_walking_bridge, bridge_cleared, GLOBALS.logger.get_queue(), bridge_close)))
-    processes.append(multiprocessing.Process(target=ship, name='ship', args=(
+    processes.append(multiprocessing.Process(target=ship_captain, name='ship', args=(
         passengers_on_ship, GLOBALS.max_trips, GLOBALS.trip_time, GLOBALS.ship_departing_interval, GLOBALS.port_captain.boarding_allowed, passengers_on_bridge,
         bridge_direction, bridge_semaphore, bridge_cleared, trips_count, GLOBALS.logger.get_queue(), GLOBALS.port_captain.signal_stop, bridge_close)))
 

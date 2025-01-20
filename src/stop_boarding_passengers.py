@@ -5,7 +5,7 @@ def stop_boarding_passengers():
     Stops all passengers from boarding the ship if the ship is in the boarding process.
     Logs the action and stops each passenger that is waiting for boarding.
     """
-    from src.objects.ship import ShipStatus
+    from src.objects.ship_captain import ShipStatus
 
     try:
         # Stop all passengers from boarding
