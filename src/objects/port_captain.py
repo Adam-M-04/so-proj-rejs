@@ -13,13 +13,14 @@ class PortCaptain:
         Initializes the PortCaptain with a reference to the ShipCaptain.
         """
         self.signal_stop = multiprocessing.Event()
+        self.boarding_allowed = multiprocessing.Value('b', False)
 
     def send_depart_now_signal(self):
         """
         Sends a signal to the ship captain to depart immediately.
         """
         GLOBALS.logger.log("Wysyłanie sygnału DEPART_NOW.")
-        GLOBALS.captain.handle_signal(PortCaptain.DEPART_NOW_SIGNAL)
+        self.boarding_allowed.value = False
 
     def send_stop_signal(self):
         """
