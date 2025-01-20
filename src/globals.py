@@ -1,6 +1,8 @@
 import threading
 
 # from src.LogService import LogService
+
+# from src.LogService import LogService
 # from src.ReaderService import ReaderService
 # from src.objects.passenger import Passenger
 # from src.objects.port_captain import PortCaptain
@@ -34,6 +36,8 @@ import threading
 #            f"mostek mieści {bridge_capacity} pasażerów, "
 #            f"pasażerowie: {passengers_num}, "
 #            f"maksymalnie {max_trips} kursów.")
+
+logger = None
 
 passengers_num = 12
 trips_count = 0

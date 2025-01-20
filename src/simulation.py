@@ -67,18 +67,16 @@ def simulation(display: SimulationDisplay):
 
     processes.append(multiprocessing.Process(target=enter_bridge, args=(
         passengers_on_bridge, boarding_allowed, passengers_on_ship, GLOBALS.ship_capacity, ship_lock, passengers_in_port,
-        bridge_semaphore,
-        bridge_direction, passengers_after_trip, passengers_walking_bridge, bridge_cleared, trips_count)))
+        bridge_semaphore, bridge_direction, passengers_after_trip, passengers_walking_bridge, bridge_cleared, trips_count, GLOBALS.logger.get_queue())))
     processes.append(multiprocessing.Process(target=ship, args=(
         passengers_on_ship, GLOBALS.max_trips, GLOBALS.trip_time, GLOBALS.ship_departing_interval, boarding_allowed, passengers_on_bridge,
-        bridge_direction, bridge_semaphore, bridge_cleared, trips_count)))
+        bridge_direction, bridge_semaphore, bridge_cleared, trips_count, GLOBALS.logger.get_queue())))
 
     # Passengers go to the bridge
     for passenger_id in passengers_in_port:
-        process = multiprocessing.Process(target=passenger, args=(
-        passenger_id, passengers_in_port, bridge_semaphore, passengers_on_bridge, boarding_allowed,
-        passengers_after_trip))
-        processes.append(process)
+        processes.append(multiprocessing.Process(target=passenger, args=(
+            passenger_id, passengers_in_port, bridge_semaphore, passengers_on_bridge, boarding_allowed,
+            passengers_after_trip, GLOBALS.logger.get_queue())))
 
     for process in processes:
         process.start()
