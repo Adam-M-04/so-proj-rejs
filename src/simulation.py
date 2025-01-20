@@ -14,9 +14,6 @@ def simulation(display: SimulationDisplay):
    Runs the simulation of ship trips until the maximum number of trips is reached or a stop signal is received.
    Handles the boarding, departure, and return of the ship for each trip.
    """
-    input_thread = threading.Thread(target=PortCaptain.read_input)
-    input_thread.start()
-
     manager = multiprocessing.Manager()
     passengers_in_port: manager.List[int] = manager.list(range(1, GLOBALS.passengers_num + 1))
     passengers_on_bridge = manager.Queue(maxsize=GLOBALS.bridge_capacity)
@@ -31,6 +28,8 @@ def simulation(display: SimulationDisplay):
     trips_count = multiprocessing.Value('i', 0)
     bridge_cleared = manager.Event()
     bridge_close = multiprocessing.Event()
+
+    GLOBALS.port_captain.start()
 
     display.start(passengers_in_port, passengers_on_bridge, passengers_walking_bridge, passengers_on_ship, passengers_after_trip)
 
@@ -55,3 +54,4 @@ def simulation(display: SimulationDisplay):
     for process in processes:
         process.join()
 
+    GLOBALS.port_captain.stop()

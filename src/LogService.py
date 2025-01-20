@@ -92,20 +92,3 @@ class LogService:
         """
         self.stop_event.set()
         self.writer.join()
-
-class BaseLogger:
-    def __init__(self, prefix: str):
-        """
-        Initializes the BaseLogger with a given prefix.
-
-        :param prefix: Prefix to be used in log messages.
-        """
-        self.prefix = prefix
-
-    def log(self, event):
-        """
-        Logs an event with the specified prefix.
-
-        :param event: The event message to log.
-        """
-        GLOBALS.logger.log(f"[{self.prefix}] {event}")

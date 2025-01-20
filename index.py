@@ -20,6 +20,11 @@ def main():
             GLOBALS.passengers_num = int(ReaderService.read_number(0, 10000, "Podaj ile pasażerów czeka dziś na rejs", GLOBALS.passengers_num))
             GLOBALS.max_trips = int(ReaderService.read_number(1, 100, "Podaj ile maksymalnie kursów może zrobić dzisiaj statek", GLOBALS.max_trips))
             GLOBALS.trip_time = int(ReaderService.read_number(1, 600, "Podaj czas trwania rejsu", GLOBALS.trip_time))
+        GLOBALS.logger.log("Parametry symulacji wczytane: "
+                       f"statek mieści {GLOBALS.ship_capacity} pasażerów, odpływa co {GLOBALS.ship_departing_interval}s, czas rejsu {GLOBALS.trip_time}s, "
+                       f"mostek mieści {GLOBALS.bridge_capacity} pasażerów, "
+                       f"pasażerowie: {GLOBALS.passengers_num}, "
+                       f"maksymalnie {GLOBALS.max_trips} kursów.")
 
         GLOBALS.logger.log("Start symulacji...")
 

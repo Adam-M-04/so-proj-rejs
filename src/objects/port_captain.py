@@ -1,6 +1,7 @@
 import multiprocessing
 import sys
 import select
+import threading
 
 import src.globals as GLOBALS
 
@@ -13,6 +14,7 @@ class PortCaptain:
         Initializes the PortCaptain with a reference to the ShipCaptain.
         """
         self.signal_stop = multiprocessing.Event()
+        self.end_thread = multiprocessing.Event()
         self.boarding_allowed = multiprocessing.Value('b', False)
 
     def send_depart_now_signal(self):
@@ -35,8 +37,20 @@ class PortCaptain:
         except Exception as e:
             GLOBALS.logger.error(e)
 
+    def start(self):
+        """
+        Starts the PortCaptain thread to listen for input from the user.
+        """
+        threading.Thread(target=self.read_input, args=(self.end_thread,)).start()
+
+    def stop(self):
+        """
+        Starts the PortCaptain thread to listen for input from the user.
+        """
+        self.end_thread.set()
+
     @staticmethod
-    def read_input():
+    def read_input(end_thread):
         """
         Reads input from the user to control the simulation.
 
@@ -45,7 +59,7 @@ class PortCaptain:
         - 'd': Sends a depart now signal to the port captain.
         """
         try:
-            while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set():
+            while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set() and not end_thread.is_set():
                 if sys.stdin in select.select([sys.stdin], [], [], 1)[0]:
                     char = sys.stdin.read(1)
                     if char == 'r':
