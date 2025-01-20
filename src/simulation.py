@@ -4,6 +4,7 @@ import src.globals as GLOBALS
 import sys
 import select
 
+from src.SimulationDisplay import SimulationDisplay
 from src.objects.Bridge import enter_bridge
 from src.objects.passenger import passenger
 from src.objects.ship import ship
@@ -30,7 +31,7 @@ def read_input():
     finally:
         return
 
-def simulation():
+def simulation(display: SimulationDisplay):
     """
    Runs the simulation of ship trips until the maximum number of trips is reached or a stop signal is received.
    Handles the boarding, departure, and return of the ship for each trip.
@@ -59,6 +60,8 @@ def simulation():
     ship_lock = manager.Lock()
     trips_count = multiprocessing.Value('i', 0)
     bridge_cleared = manager.Event()
+
+    display.start(passengers_in_port, passengers_on_bridge, passengers_walking_bridge, passengers_on_ship, passengers_after_trip)
 
     processes = []
 

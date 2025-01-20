@@ -27,7 +27,6 @@ def walk_bridge(passenger_id, bridge_direction, ship_lock, boarding_allowed, pas
 
 def enter_bridge(passengers_on_bridge, boarding_allowed, passengers_on_ship, ship_capacity, ship_lock, passengers_in_port, bridge_semaphore, bridge_direction, passengers_after_trip, passengers_walking_bridge, bridge_cleared, trips_count):
     while True:
-        print(len(passengers_in_port), passengers_on_bridge.qsize() + len(passengers_walking_bridge), len(passengers_on_ship), len(passengers_after_trip))
         if not passengers_on_bridge.empty():
             bridge_cleared.clear()
             passenger_id = passengers_on_bridge.get()
