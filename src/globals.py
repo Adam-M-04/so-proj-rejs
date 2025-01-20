@@ -1,7 +1,7 @@
 # from src.LogService import LogService
 
 # from src.LogService import LogService
-# from src.ReaderService import ReaderService
+from src.ReaderService import ReaderService
 # from src.objects.passenger import Passenger
 from src.objects.port_captain import PortCaptain
 # from src.objects.ship import Ship
@@ -36,6 +36,8 @@ from src.objects.port_captain import PortCaptain
 #            f"maksymalnie {max_trips} kursów.")
 
 logger = None
+
+use_defaults = False
 
 passengers_num = 12
 trips_count = 0
