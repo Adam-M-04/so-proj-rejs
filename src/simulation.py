@@ -9,9 +9,10 @@ from src.objects.ship_captain import ship_captain
 
 def simulation(display: SimulationDisplay):
     """
-   Runs the simulation of ship trips until the maximum number of trips is reached or a stop signal is received.
-   Handles the boarding, departure, and return of the ship for each trip.
-   """
+    Runs the simulation with the given display.
+
+    :param display: The SimulationDisplay instance to use for displaying the simulation.
+    """
     manager = multiprocessing.Manager()
     passengers_in_port: manager.List[int] = manager.list(range(1, GLOBALS.passengers_num + 1))
     passengers_on_bridge = manager.Queue(maxsize=GLOBALS.bridge_capacity)
@@ -35,22 +36,26 @@ def simulation(display: SimulationDisplay):
 
     processes = []
 
+    # Create the bridge process
     processes.append(multiprocessing.Process(target=enter_bridge, args=(
         passengers_on_bridge, GLOBALS.port_captain.boarding_allowed, passengers_on_ship, GLOBALS.ship_capacity, ship_lock, passengers_in_port,
         bridge_semaphore, bridge_direction, passengers_after_trip, passengers_walking_bridge, bridge_cleared, GLOBALS.logger.get_queue(), bridge_close, trip_completed)))
+    # Create the ship process
     processes.append(multiprocessing.Process(target=ship_captain, name='ship', args=(
         passengers_on_ship, GLOBALS.max_trips, GLOBALS.trip_time, GLOBALS.ship_departing_interval, GLOBALS.port_captain.boarding_allowed, passengers_on_bridge,
         bridge_direction, bridge_semaphore, bridge_cleared, trips_count, GLOBALS.logger.get_queue(), GLOBALS.port_captain.signal_stop, bridge_close, trip_completed, trip_time_tracker)))
 
-    # Passengers go to the bridge
+    # Create passenger processes
     for passenger_id in passengers_in_port:
         processes.append(multiprocessing.Process(target=passenger, args=(
             passenger_id, passengers_in_port, bridge_semaphore, passengers_on_bridge, GLOBALS.port_captain.boarding_allowed,
             passengers_after_trip, GLOBALS.logger.get_queue(), bridge_close)))
 
+    # Start processes
     for process in processes:
         process.start()
 
+    # Wait for processes to finish
     for process in processes:
         process.join()
 

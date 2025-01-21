@@ -77,6 +77,11 @@ class LogService:
         queue.put(f"{timestamp} - [ERROR] {error}")
 
     def get_queue(self):
+        """
+        Returns the queue used for logging.
+
+        :return:
+        """
         return self.queue
 
     def start(self):

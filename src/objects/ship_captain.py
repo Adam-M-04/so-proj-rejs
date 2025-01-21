@@ -4,7 +4,26 @@ from src.LogService import LogService
 
 
 def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interval, boarding_allowed, passengers_on_bridge, bridge_direction, bridge_semaphore, bridge_cleared, trips_count, logger_queue, signal_stop, bridge_close, trip_completed, trip_time_tracker):
-    """Board passengers on the ship and make trips."""
+    """
+    Manages the boarding of passengers on the ship and the execution of trips.
+
+    Args:
+        passengers_on_ship (multiprocessing.List): List of passengers currently on the ship.
+        max_trips (int): Maximum number of trips the ship will make.
+        trip_time (float): Duration of each trip in seconds.
+        ship_departing_interval (float): Time interval for boarding before the ship departs.
+        boarding_allowed (multiprocessing.Value): Flag indicating if boarding is allowed.
+        passengers_on_bridge (multiprocessing.Queue): Queue of passengers waiting to enter the bridge.
+        bridge_direction (multiprocessing.Value): The direction of the bridge (True for boarding, False for disembarking).
+        bridge_semaphore (multiprocessing.Semaphore): Semaphore to control access to the bridge.
+        bridge_cleared (multiprocessing.Event): Event to signal that the bridge is cleared.
+        trips_count (multiprocessing.Value): Counter for the number of trips completed.
+        logger_queue (multiprocessing.Queue): Queue for logging messages.
+        signal_stop (multiprocessing.Event): Event to signal stopping the ship captain process.
+        bridge_close (multiprocessing.Event): Event to signal that the bridge is closed.
+        trip_completed (multiprocessing.Value): Flag indicating if the trip is completed.
+        trip_time_tracker (multiprocessing.Value): Tracker for the trip time.
+    """
     while trips_count.value < max_trips and not signal_stop.is_set():
         LogService.log_static(f"Rejs nr {trips_count.value + 1}", logger_queue)
         start_time = time.time()

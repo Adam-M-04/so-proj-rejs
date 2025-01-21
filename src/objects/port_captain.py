@@ -6,9 +6,6 @@ import threading
 import src.globals as GLOBALS
 
 class PortCaptain:
-    DEPART_NOW_SIGNAL = "DEPART_NOW"
-    STOP_ALL_CRUISES_SIGNAL = "STOP_ALL_CRUISES"
-
     def __init__(self):
         """
         Initializes the PortCaptain with a reference to the ShipCaptain.
