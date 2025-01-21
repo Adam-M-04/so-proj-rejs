@@ -24,6 +24,7 @@ def simulation(display: SimulationDisplay):
     bridge_semaphore = manager.Semaphore(GLOBALS.bridge_capacity)
     ship_lock = manager.Lock()
     trips_count = multiprocessing.Value('i', 0)
+    trip_completed = multiprocessing.Value('b', True)
     bridge_cleared = manager.Event()
     bridge_close = multiprocessing.Event()
 
@@ -35,10 +36,10 @@ def simulation(display: SimulationDisplay):
 
     processes.append(multiprocessing.Process(target=enter_bridge, args=(
         passengers_on_bridge, GLOBALS.port_captain.boarding_allowed, passengers_on_ship, GLOBALS.ship_capacity, ship_lock, passengers_in_port,
-        bridge_semaphore, bridge_direction, passengers_after_trip, passengers_walking_bridge, bridge_cleared, GLOBALS.logger.get_queue(), bridge_close)))
+        bridge_semaphore, bridge_direction, passengers_after_trip, passengers_walking_bridge, bridge_cleared, GLOBALS.logger.get_queue(), bridge_close, trip_completed)))
     processes.append(multiprocessing.Process(target=ship_captain, name='ship', args=(
         passengers_on_ship, GLOBALS.max_trips, GLOBALS.trip_time, GLOBALS.ship_departing_interval, GLOBALS.port_captain.boarding_allowed, passengers_on_bridge,
-        bridge_direction, bridge_semaphore, bridge_cleared, trips_count, GLOBALS.logger.get_queue(), GLOBALS.port_captain.signal_stop, bridge_close)))
+        bridge_direction, bridge_semaphore, bridge_cleared, trips_count, GLOBALS.logger.get_queue(), GLOBALS.port_captain.signal_stop, bridge_close, trip_completed)))
 
     # Passengers go to the bridge
     for passenger_id in passengers_in_port:
