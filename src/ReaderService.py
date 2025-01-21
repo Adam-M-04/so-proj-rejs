@@ -22,7 +22,7 @@ class ReaderService:
                 print("Niepoprawna wartość. Wprowadź liczbę.")
 
     @staticmethod
-    def read_boolean(message: str, default_value: float) -> float:
+    def read_boolean(message: str, default_value: float) -> bool:
         """
         Reads a boolean from the user, with default value.
 

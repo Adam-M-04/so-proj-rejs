@@ -28,6 +28,7 @@ def simulation(display: SimulationDisplay):
     trip_completed = multiprocessing.Value('b', True)
     trip_time_tracker = multiprocessing.Value('d', -1)
     bridge_cleared = manager.Event()
+    bridge_cleared.set()
     bridge_close = multiprocessing.Event()
 
     GLOBALS.port_captain.start()
