@@ -51,7 +51,7 @@ class SimulationDisplay:
         print("r + enter - zatrzymaj rejs")
         print("d + enter - natychmiastowy odpływ")
 
-    def update_display(self, passengers_in_port, passengers_on_bridge, passengers_walking_bridge, passengers_on_ship, passengers_after_trip):
+    def update_display(self, passengers_in_port, passengers_on_bridge, passengers_walking_bridge, passengers_on_ship, passengers_after_trip, trip_time_tracker):
         """
         Clears the terminal and displays the updated simulation data.
         """
@@ -71,7 +71,7 @@ class SimulationDisplay:
         print("\nMostek")
         print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
 
-        print(f"\nStatek")
+        print(f"\nStatek {'' if trip_time_tracker.value < 0 else f'(trwa rejs: {round(time.time() - trip_time_tracker.value, 1)}/{GLOBALS.trip_time}s)'}")
         print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
 
         print("\nPort (po rejsie)")

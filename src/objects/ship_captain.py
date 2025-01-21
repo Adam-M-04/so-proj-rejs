@@ -3,7 +3,7 @@ import time
 from src.LogService import LogService
 
 
-def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interval, boarding_allowed, passengers_on_bridge, bridge_direction, bridge_semaphore, bridge_cleared, trips_count, logger_queue, signal_stop, bridge_close, trip_completed):
+def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interval, boarding_allowed, passengers_on_bridge, bridge_direction, bridge_semaphore, bridge_cleared, trips_count, logger_queue, signal_stop, bridge_close, trip_completed, trip_time_tracker):
     """Board passengers on the ship and make trips."""
     while trips_count.value < max_trips and not signal_stop.is_set():
         LogService.log_static(f"Rejs nr {trips_count.value + 1}", logger_queue)
@@ -26,8 +26,10 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
             LogService.log_static("Rejs odwołany.", logger_queue)
         elif len(passengers_on_ship) > 0:
             LogService.log_static(f"Statek odpływa z {len(passengers_on_ship)} pasażerami na pokładzie.", logger_queue)
+            trip_time_tracker.value = time.time()
             time.sleep(trip_time)
             trip_completed.value = True
+            trip_time_tracker.value = -1
             LogService.log_static("Statek powrócił do portu", logger_queue)
         else:
             LogService.log_static("Brak pasażerów na statku, rejs odwołany.", logger_queue)
