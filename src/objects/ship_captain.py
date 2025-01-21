@@ -31,7 +31,7 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
         boarding_allowed.value = True
         trip_completed.value = False
 
-        while (time.time() - start_time) < ship_departing_interval:
+        while (time.time() - start_time) < ship_departing_interval and boarding_allowed.value:
             time.sleep(0.1)
 
         boarding_allowed.value = False
