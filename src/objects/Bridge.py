@@ -1,6 +1,5 @@
 import os
 import random
-import time
 from time import sleep
 
 from src.objects.SharedMemory import append_to_shared_memory, write_to_shared_memory, read_from_shared_memory, \
@@ -83,4 +82,4 @@ def enter_bridge(passengers_on_bridge, boarding_allowed, passengers_on_ship, shi
                             log_method, trip_completed)
                 os._exit(0)
         else:
-            time.sleep(0.1)
+            sleep(0.1)

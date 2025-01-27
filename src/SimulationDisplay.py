@@ -1,5 +1,6 @@
 import os
 import time
+from time import sleep
 import threading
 import src.globals as GLOBALS
 
@@ -40,7 +41,7 @@ class SimulationDisplay:
         """
         while not self.stopped.is_set():
             self.update_display(*args)
-            time.sleep(self.refresh_interval)
+            sleep(self.refresh_interval)
 
     @staticmethod
     def clear():

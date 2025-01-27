@@ -1,5 +1,5 @@
-import os
 import time
+from time import sleep
 import struct
 from src.SimulationDisplay import count_passengers_in_shared_memory
 from src.objects.SharedMemory import read_from_shared_memory, write_to_shared_memory, remove_from_shared_memory, shared_memory_to_array
@@ -47,7 +47,7 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
         write_to_shared_memory(trip_completed, 0, 0)
 
         while (time.time() - start_time) < ship_departing_interval and read_from_shared_memory(boarding_allowed):
-            time.sleep(0.1)
+            sleep(0.1)
 
         write_to_shared_memory(boarding_allowed, 0, 0)
         log_method("Czas na wypłynięcie statku")
@@ -61,7 +61,7 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
         elif count_passengers_in_shared_memory(passengers_on_ship) > 0:
             log_method(f"Statek odpływa z {count_passengers_in_shared_memory(passengers_on_ship)} pasażerami na pokładzie.")
             write_to_shared_memory(trip_time_tracker, 0, int(time.time()), 'd')
-            time.sleep(trip_time)
+            sleep(trip_time)
             write_to_shared_memory(trip_completed, 0, 1)
             write_to_shared_memory(trip_time_tracker, 0, -1, 'd')
             log_method("Statek powrócił do portu")
@@ -76,7 +76,7 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
             remove_from_shared_memory(passengers_on_ship, passenger_id)
             passengers_on_bridge_w.send(passenger_id)
             log_method(f"Pasażer {passenger_id} schodzi na mostek.")
-            time.sleep(0.1)
+            sleep(0.1)
 
         bridge_cleared.wait()
 
