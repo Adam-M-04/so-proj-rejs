@@ -75,7 +75,11 @@ class SimulationDisplay:
         print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
 
         trip_time_value = read_from_shared_memory(trip_time_tracker, 'd')
-        print(f"\nStatek {'' if trip_time_value < 0 else f'(trwa rejs: {round(time.time() - trip_time_value, 1)}/{GLOBALS.trip_time}s)'}")
+        if trip_time_value > 0:
+            trip_time_value = round(time.time() - trip_time_value, 1)
+        else:
+            trip_time_value = -1
+        print(f"\nStatek {f'(trwa rejs: {trip_time_value}/{GLOBALS.trip_time}s)' if (0 <= trip_time_value <= GLOBALS.trip_time) else ''}")
         print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
 
         print("\nPort (po rejsie)")

@@ -60,10 +60,10 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
             log_method("Rejs odwołany.")
         elif count_passengers_in_shared_memory(passengers_on_ship) > 0:
             log_method(f"Statek odpływa z {count_passengers_in_shared_memory(passengers_on_ship)} pasażerami na pokładzie.")
-            write_to_shared_memory(trip_time_tracker, 0, int(time.time()))
+            write_to_shared_memory(trip_time_tracker, 0, int(time.time()), 'd')
             time.sleep(trip_time)
             write_to_shared_memory(trip_completed, 0, 1)
-            write_to_shared_memory(trip_time_tracker, 0, -1)
+            write_to_shared_memory(trip_time_tracker, 0, -1, 'd')
             log_method("Statek powrócił do portu")
         else:
             log_method("Brak pasażerów na statku, rejs odwołany.")
