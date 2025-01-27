@@ -59,29 +59,32 @@ class SimulationDisplay:
         """
         Clears the terminal and displays the updated simulation data.
         """
-        self.clear()
-        self.print_actions()
+        try:
+            self.clear()
+            self.print_actions()
 
-        passengers_in_port = count_passengers_in_shared_memory(passengers_in_port)
-        passengers_on_bridge = count_passengers_in_shared_memory(passengers_walking_bridge)
-        passengers_on_ship = count_passengers_in_shared_memory(passengers_on_ship)
-        passengers_after_cruise = count_passengers_in_shared_memory(passengers_after_trip)
-        total = GLOBALS.passengers_num
+            passengers_in_port = count_passengers_in_shared_memory(passengers_in_port)
+            passengers_on_bridge = count_passengers_in_shared_memory(passengers_walking_bridge)
+            passengers_on_ship = count_passengers_in_shared_memory(passengers_on_ship)
+            passengers_after_cruise = count_passengers_in_shared_memory(passengers_after_trip)
+            total = GLOBALS.passengers_num
 
-        print("\n=== PASAŻEROWIE W PORCIE ===")
-        print("\nPort (oczekujący na rejs)")
-        print(f"[{'X' * passengers_in_port}{' ' * (total - passengers_in_port)}] {passengers_in_port}/{total}")
+            print("\n=== PASAŻEROWIE W PORCIE ===")
+            print("\nPort (oczekujący na rejs)")
+            print(f"[{'X' * passengers_in_port}{' ' * (total - passengers_in_port)}] {passengers_in_port}/{total}")
 
-        print("\nMostek")
-        print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
+            print("\nMostek")
+            print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
 
-        trip_time_value = read_from_shared_memory(trip_time_tracker, 'd')
-        if trip_time_value > 0:
-            trip_time_value = round(time.time() - trip_time_value, 1)
-        else:
-            trip_time_value = -1
-        print(f"\nStatek {f'(trwa rejs: {trip_time_value}/{GLOBALS.trip_time}s)' if (0 <= trip_time_value <= GLOBALS.trip_time) else ''}")
-        print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
+            trip_time_value = read_from_shared_memory(trip_time_tracker, 'd')
+            if trip_time_value > 0:
+                trip_time_value = round(time.time() - trip_time_value, 1)
+            else:
+                trip_time_value = -1
+            print(f"\nStatek {f'(trwa rejs: {trip_time_value}/{GLOBALS.trip_time}s)' if (0 <= trip_time_value <= GLOBALS.trip_time) else ''}")
+            print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
 
-        print("\nPort (po rejsie)")
-        print(f"[{'X' * passengers_after_cruise}{' ' * (total - passengers_after_cruise)}] {passengers_after_cruise}/{total}")
+            print("\nPort (po rejsie)")
+            print(f"[{'X' * passengers_after_cruise}{' ' * (total - passengers_after_cruise)}] {passengers_after_cruise}/{total}")
+        except:
+            self.stop()
