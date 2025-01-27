@@ -32,7 +32,6 @@ def main():
 
         GLOBALS.logger.log("Koniec symulacji...")
 
-        sleep(1)
         display.stop()
     except Exception as e:
         GLOBALS.logger.error(e)

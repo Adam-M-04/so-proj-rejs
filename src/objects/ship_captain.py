@@ -28,7 +28,7 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
         trip_time (float): Duration of each trip in seconds.
         ship_departing_interval (float): Time interval for boarding before the ship departs.
         boarding_allowed (mmap.mmap): Shared memory for the flag indicating if boarding is allowed.
-        passengers_on_bridge_r (int): File descriptor for reading passengers waiting to enter the bridge.
+        passengers_on_bridge_w (int): File descriptor for reading passengers waiting to enter the bridge.
         bridge_direction (mmap.mmap): Shared memory for the direction of the bridge (True for boarding, False for disembarking).
         bridge_semaphore (multiprocessing.Semaphore): Semaphore to control access to the bridge.
         bridge_cleared (multiprocessing.Event): Event to signal that the bridge is cleared.

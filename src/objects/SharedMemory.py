@@ -38,16 +38,19 @@ def count_passengers_in_shared_memory(shm, fmt='i'):
     :param fmt: The format of each element (default is 'i' for integer).
     :return: The count of non-zero entries.
     """
-    count = 0
-    length = len(shm)
-    element_size = struct.calcsize(fmt)
-    for i in range(length//4):
-        offset = i * element_size
-        shm.seek(offset)
-        value = struct.unpack(fmt, shm.read(element_size))[0]
-        if value != 0:
-            count += 1
-    return count
+    try:
+        count = 0
+        length = len(shm)
+        element_size = struct.calcsize(fmt)
+        for i in range(length//4):
+            offset = i * element_size
+            shm.seek(offset)
+            value = struct.unpack(fmt, shm.read(element_size))[0]
+            if value != 0:
+                count += 1
+        return count
+    except:
+        return 0
 
 def remove_from_shared_memory(shared_memory, pass_id, fmt='i'):
     element_size = struct.calcsize(fmt)

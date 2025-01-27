@@ -1,5 +1,7 @@
 import os
 import multiprocessing
+from time import sleep
+
 import src.globals as GLOBALS
 
 from src.SimulationDisplay import SimulationDisplay
@@ -78,10 +80,12 @@ def simulation(display: SimulationDisplay):
     for pid in processes:
         os.waitpid(pid, 0)
 
+    sleep(1)
+
     # Close shared memory
     passengers_in_port_shm.close()
-    os.close(passengers_on_bridge_r)
-    os.close(passengers_on_bridge_w)
+    passengers_on_bridge_r.close()
+    passengers_on_bridge_w.close()
     passengers_walking_bridge_shm.close()
     passengers_on_ship_shm.close()
     passengers_after_trip_shm.close()
