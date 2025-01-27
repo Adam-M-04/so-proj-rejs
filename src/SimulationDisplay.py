@@ -3,7 +3,10 @@ import time
 import threading
 import src.globals as GLOBALS
 
+from src.objects.SharedMemory import count_passengers_in_shared_memory, read_from_shared_memory
+
 os.environ['TERM'] = 'xterm-256color'
+
 
 class SimulationDisplay:
     def __init__(self, refresh_interval: float = 1):
@@ -51,17 +54,17 @@ class SimulationDisplay:
         print("r + enter - zatrzymaj rejs")
         print("d + enter - natychmiastowy odpływ")
 
-    def update_display(self, passengers_in_port, passengers_on_bridge, passengers_walking_bridge, passengers_on_ship, passengers_after_trip, trip_time_tracker):
+    def update_display(self, passengers_in_port, passengers_on_bridge_r, passengers_walking_bridge, passengers_on_ship, passengers_after_trip, trip_time_tracker):
         """
         Clears the terminal and displays the updated simulation data.
         """
         self.clear()
         self.print_actions()
 
-        passengers_in_port = len(passengers_in_port)
-        passengers_on_bridge = len(passengers_walking_bridge) + passengers_on_bridge.qsize()
-        passengers_on_ship = len(passengers_on_ship)
-        passengers_after_cruise = len(passengers_after_trip)
+        passengers_in_port = count_passengers_in_shared_memory(passengers_in_port)
+        passengers_on_bridge = count_passengers_in_shared_memory(passengers_walking_bridge)
+        passengers_on_ship = count_passengers_in_shared_memory(passengers_on_ship)
+        passengers_after_cruise = count_passengers_in_shared_memory(passengers_after_trip)
         total = GLOBALS.passengers_num
 
         print("\n=== PASAŻEROWIE W PORCIE ===")
@@ -71,7 +74,8 @@ class SimulationDisplay:
         print("\nMostek")
         print(f"[{'X' * passengers_on_bridge}{' ' * (GLOBALS.bridge_capacity - passengers_on_bridge)}] {passengers_on_bridge}/{GLOBALS.bridge_capacity}")
 
-        print(f"\nStatek {'' if trip_time_tracker.value < 0 else f'(trwa rejs: {round(time.time() - trip_time_tracker.value, 1)}/{GLOBALS.trip_time}s)'}")
+        trip_time_value = read_from_shared_memory(trip_time_tracker, 'd')
+        print(f"\nStatek {'' if trip_time_value < 0 else f'(trwa rejs: {round(time.time() - trip_time_value, 1)}/{GLOBALS.trip_time}s)'}")
         print(f"[{'X' * passengers_on_ship}{' ' * (GLOBALS.ship_capacity - passengers_on_ship)}] {passengers_on_ship}/{GLOBALS.ship_capacity}")
 
         print("\nPort (po rejsie)")

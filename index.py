@@ -1,16 +1,14 @@
 from time import sleep
-
+import src.globals as GLOBALS
 from src.LogService import LogService
 from src.ReaderService import ReaderService
 from src.SimulationDisplay import SimulationDisplay
 from src.simulation import simulation
-import src.globals as GLOBALS
 
 def main():
     try:
         # Create a shared LogService instance
         GLOBALS.logger = LogService()
-        GLOBALS.logger.start()
 
         GLOBALS.use_defaults = ReaderService.read_boolean("Czy chcesz użyć domyślnych parametrów symulacji?", 1)
         if not GLOBALS.use_defaults:

@@ -1,68 +1,85 @@
+import os
 import time
+import struct
+from src.SimulationDisplay import count_passengers_in_shared_memory
+from src.objects.SharedMemory import read_from_shared_memory, write_to_shared_memory, remove_from_shared_memory, shared_memory_to_array
 
-from src.LogService import LogService
 
+def is_signal_stop_set(shared_memory):
+    """
+    Checks if the stop signal is set in the shared memory.
 
-def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interval, boarding_allowed, passengers_on_bridge, bridge_direction, bridge_semaphore, bridge_cleared, trips_count, logger_queue, signal_stop, bridge_close, trip_completed, trip_time_tracker):
+    Args:
+        shared_memory (mmap.mmap): The shared memory object.
+
+    Returns:
+        bool: True if the stop signal is set, False otherwise.
+    """
+    shared_memory.seek(0)
+    return struct.unpack('b', shared_memory.read(1))[0] == 1
+
+def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interval, boarding_allowed, passengers_on_bridge_w, bridge_direction, bridge_semaphore, bridge_cleared, trips_count, log_method, signal_stop, bridge_close, trip_completed, trip_time_tracker):
     """
     Manages the boarding of passengers on the ship and the execution of trips.
 
     Args:
-        passengers_on_ship (multiprocessing.List): List of passengers currently on the ship.
+        passengers_on_ship (mmap.mmap): Shared memory for passengers currently on the ship.
         max_trips (int): Maximum number of trips the ship will make.
         trip_time (float): Duration of each trip in seconds.
         ship_departing_interval (float): Time interval for boarding before the ship departs.
-        boarding_allowed (multiprocessing.Value): Flag indicating if boarding is allowed.
-        passengers_on_bridge (multiprocessing.Queue): Queue of passengers waiting to enter the bridge.
-        bridge_direction (multiprocessing.Value): The direction of the bridge (True for boarding, False for disembarking).
+        boarding_allowed (mmap.mmap): Shared memory for the flag indicating if boarding is allowed.
+        passengers_on_bridge_r (int): File descriptor for reading passengers waiting to enter the bridge.
+        bridge_direction (mmap.mmap): Shared memory for the direction of the bridge (True for boarding, False for disembarking).
         bridge_semaphore (multiprocessing.Semaphore): Semaphore to control access to the bridge.
         bridge_cleared (multiprocessing.Event): Event to signal that the bridge is cleared.
-        trips_count (multiprocessing.Value): Counter for the number of trips completed.
-        logger_queue (multiprocessing.Queue): Queue for logging messages.
-        signal_stop (multiprocessing.Event): Event to signal stopping the ship captain process.
+        trips_count (mmap.mmap): Shared memory for the number of trips completed.
+        log_method: Logging method from Log service
+        signal_stop: Event to signal stopping the ship captain process.
         bridge_close (multiprocessing.Event): Event to signal that the bridge is closed.
-        trip_completed (multiprocessing.Value): Flag indicating if the trip is completed.
-        trip_time_tracker (multiprocessing.Value): Tracker for the trip time.
+        trip_completed (mmap.mmap): Shared memory for the flag indicating if the trip is completed.
+        trip_time_tracker (mmap.mmap): Shared memory for the trip time tracker.
     """
-    while trips_count.value < max_trips and not signal_stop.is_set():
-        LogService.log_static(f"Rejs nr {trips_count.value + 1}", logger_queue)
+    while read_from_shared_memory(trips_count) < max_trips and not read_from_shared_memory(signal_stop):
+        log_method(f"Rejs nr {read_from_shared_memory(trips_count) + 1}")
         start_time = time.time()
-        bridge_direction.value = True
-        boarding_allowed.value = True
-        trip_completed.value = False
+        write_to_shared_memory(bridge_direction, 0, 1)
+        write_to_shared_memory(boarding_allowed, 0, 1)
+        write_to_shared_memory(trip_completed, 0, 0)
 
-        while (time.time() - start_time) < ship_departing_interval and boarding_allowed.value:
+        while (time.time() - start_time) < ship_departing_interval and read_from_shared_memory(boarding_allowed):
             time.sleep(0.1)
 
-        boarding_allowed.value = False
-        LogService.log_static("Czas na wypłynięcie statku", logger_queue)
+        write_to_shared_memory(boarding_allowed, 0, 0)
+        log_method("Czas na wypłynięcie statku")
 
         bridge_cleared.wait()
 
-        LogService.log_static("Mostek pusty, statek gotowy do odpłynięcia", logger_queue)
+        log_method("Mostek pusty, statek gotowy do odpłynięcia")
 
-        if signal_stop.is_set():
-            LogService.log_static("Rejs odwołany.", logger_queue)
-        elif len(passengers_on_ship) > 0:
-            LogService.log_static(f"Statek odpływa z {len(passengers_on_ship)} pasażerami na pokładzie.", logger_queue)
-            trip_time_tracker.value = time.time()
+        if read_from_shared_memory(signal_stop):
+            log_method("Rejs odwołany.")
+        elif count_passengers_in_shared_memory(passengers_on_ship) > 0:
+            log_method(f"Statek odpływa z {count_passengers_in_shared_memory(passengers_on_ship)} pasażerami na pokładzie.")
+            write_to_shared_memory(trip_time_tracker, 0, int(time.time()))
             time.sleep(trip_time)
-            trip_completed.value = True
-            trip_time_tracker.value = -1
-            LogService.log_static("Statek powrócił do portu", logger_queue)
+            write_to_shared_memory(trip_completed, 0, 1)
+            write_to_shared_memory(trip_time_tracker, 0, -1)
+            log_method("Statek powrócił do portu")
         else:
-            LogService.log_static("Brak pasażerów na statku, rejs odwołany.", logger_queue)
+            log_method("Brak pasażerów na statku, rejs odwołany.")
 
-        bridge_direction.value = False
-        while len(passengers_on_ship) > 0:
+        write_to_shared_memory(bridge_direction, 0, 0)
+
+        arr = shared_memory_to_array(passengers_on_ship)
+        for passenger_id in arr:
             bridge_semaphore.acquire()
-            passenger_id = passengers_on_ship.pop(0)
-            passengers_on_bridge.put(passenger_id)
-            LogService.log_static(f"Pasażer {passenger_id} schodzi na mostek.", logger_queue)
+            remove_from_shared_memory(passengers_on_ship, passenger_id)
+            passengers_on_bridge_w.send(passenger_id)
+            log_method(f"Pasażer {passenger_id} schodzi na mostek.")
             time.sleep(0.1)
 
         bridge_cleared.wait()
 
-        trips_count.value += 1
+        write_to_shared_memory(trips_count, 0, read_from_shared_memory(trips_count) + 1)
 
     bridge_close.set()

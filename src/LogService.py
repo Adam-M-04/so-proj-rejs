@@ -1,9 +1,6 @@
-import multiprocessing
 import os
 import datetime
-
-import src.globals as GLOBALS
-
+import threading
 
 class LogService:
     def __init__(self, log_dir='logs'):
@@ -12,27 +9,30 @@ class LogService:
 
         :param log_dir: Directory where log files will be stored.
         """
-        self.writer = None
         self.log_dir = log_dir
         os.makedirs(self.log_dir, exist_ok=True)
         self.log_file = os.path.join(self.log_dir, f"log_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
-        self.queue = multiprocessing.Queue()
-        self.stop_event = multiprocessing.Event()
+        self.pipe_r, self.pipe_w = os.pipe()
+        self.stop_event = threading.Event()
+        self.writer_thread = threading.Thread(target=self._log_writer)
+        self.writer_thread.start()
 
     def _create_log_file(self, file):
         """
         Creates a new log file and writes the creation timestamp.
         """
         file.write(f"Logi symulacji utworzone {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        file.flush()
 
     def _log_writer(self):
         with open(self.log_file, 'w') as file:
             self._create_log_file(file)
-            while not self.stop_event.is_set() or not self.queue.empty():
+            while not self.stop_event.is_set():
                 try:
-                    record = self.queue.get(timeout=1)
-                    file.write(record + '\n')
-                    file.flush()
+                    record = os.read(self.pipe_r, 1024).decode()
+                    if record:
+                        file.write(record)
+                        file.flush()
                 except Exception as e:
                     continue
 
@@ -43,7 +43,7 @@ class LogService:
         :param event: The event message to log.
         """
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.queue.put(f"{timestamp} - {event}")
+        os.write(self.pipe_w, f"{timestamp} - {event}\n".encode())
 
     def error(self, error):
         """
@@ -52,48 +52,14 @@ class LogService:
         :param error: The error event message to log.
         """
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.queue.put(f"{timestamp} - [ERROR] {error}")
-
-    @staticmethod
-    def log_static(event, queue):
-        """
-        Logs an event with a timestamp.
-
-        :param queue:
-        :param event: The event message to log.
-        """
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        queue.put(f"{timestamp} - {event}")
-
-    @staticmethod
-    def error_static(error, queue):
-        """
-        Logs an error event with a timestamp.
-
-        :param queue:
-        :param error: The error event message to log.
-        """
-        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        queue.put(f"{timestamp} - [ERROR] {error}")
-
-    def get_queue(self):
-        """
-        Returns the queue used for logging.
-
-        :return:
-        """
-        return self.queue
-
-    def start(self):
-        """
-        Starts the log writer process.
-        """
-        self.writer = multiprocessing.Process(target=self._log_writer)
-        self.writer.start()
+        os.write(self.pipe_w, f"{timestamp} - [ERROR] {error}\n".encode())
 
     def stop(self):
         """
-        Closes the log file.
+        Stops the log writer thread.
         """
         self.stop_event.set()
-        self.writer.join()
+        os.write(self.pipe_w, b'\0')  # Ensure the writer exits the loop
+        self.writer_thread.join()
+        os.close(self.pipe_r)
+        os.close(self.pipe_w)

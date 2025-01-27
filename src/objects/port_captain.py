@@ -1,7 +1,9 @@
-import multiprocessing
+import os
 import sys
 import select
-import threading
+import mmap
+import struct
+from src.objects.SharedMemory import create_shared_memory, write_to_shared_memory, read_from_shared_memory
 
 import src.globals as GLOBALS
 
@@ -10,16 +12,16 @@ class PortCaptain:
         """
         Initializes the PortCaptain with a reference to the ShipCaptain.
         """
-        self.signal_stop = multiprocessing.Event()
-        self.end_thread = multiprocessing.Event()
-        self.boarding_allowed = multiprocessing.Value('b', False)
+        self.signal_stop = create_shared_memory(1)
+        self.end_thread = create_shared_memory(1)
+        self.boarding_allowed = create_shared_memory(1)
 
     def send_depart_now_signal(self):
         """
         Sends a signal to the ship captain to depart immediately.
         """
         GLOBALS.logger.log("Wysyłanie sygnału DEPART_NOW.")
-        self.boarding_allowed.value = False
+        write_to_shared_memory(self.boarding_allowed, 0)
 
     def send_stop_signal(self):
         """
@@ -27,27 +29,29 @@ class PortCaptain:
         """
         try:
             GLOBALS.logger.log("Wysyłanie sygnału STOP_ALL_CRUISES.")
-            if self.signal_stop.is_set():
+            if read_from_shared_memory(self.signal_stop):
                 GLOBALS.logger.log("Sygnał STOP_ALL_CRUISES został już wysłany.")
                 return
-            self.signal_stop.set()
+            write_to_shared_memory(self.signal_stop, 1)
         except Exception as e:
             GLOBALS.logger.error(e)
 
     def start(self):
         """
-        Starts the PortCaptain thread to listen for input from the user.
+        Starts the PortCaptain process to listen for input from the user.
         """
-        threading.Thread(target=self.read_input, args=(self.end_thread,)).start()
+        pid = os.fork()
+        if pid == 0:
+            self.read_input()
+            os._exit(0)
 
     def stop(self):
         """
-        Starts the PortCaptain thread to listen for input from the user.
+        Stops the PortCaptain process.
         """
-        self.end_thread.set()
+        write_to_shared_memory(self.end_thread, 1)
 
-    @staticmethod
-    def read_input(end_thread):
+    def read_input(self):
         """
         Reads input from the user to control the simulation.
 
@@ -56,13 +60,13 @@ class PortCaptain:
         - 'd': Sends a depart now signal to the port captain.
         """
         try:
-            while GLOBALS.trips_count < GLOBALS.max_trips and not GLOBALS.port_captain.signal_stop.is_set() and not end_thread.is_set():
+            while GLOBALS.trips_count < GLOBALS.max_trips and not read_from_shared_memory(self.signal_stop) and not read_from_shared_memory(self.end_thread):
                 if sys.stdin in select.select([sys.stdin], [], [], 1)[0]:
                     char = sys.stdin.read(1)
                     if char == 'r':
-                        GLOBALS.port_captain.send_stop_signal()
+                        self.send_stop_signal()
                     elif char == 'd':
-                        GLOBALS.port_captain.send_depart_now_signal()
+                        self.send_depart_now_signal()
         except Exception as e:
             GLOBALS.logger.error(e)
         finally:
