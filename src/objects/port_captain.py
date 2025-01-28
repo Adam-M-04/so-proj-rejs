@@ -21,7 +21,7 @@ class PortCaptain:
         Sends a signal to the ship captain to depart immediately.
         """
         GLOBALS.logger.log("Wysyłanie sygnału DEPART_NOW.")
-        write_to_shared_memory(self.boarding_allowed, 0)
+        write_to_shared_memory(self.boarding_allowed, 0, 0)
 
     def send_stop_signal(self):
         """
@@ -32,7 +32,7 @@ class PortCaptain:
             if read_from_shared_memory(self.signal_stop):
                 GLOBALS.logger.log("Sygnał STOP_ALL_CRUISES został już wysłany.")
                 return
-            write_to_shared_memory(self.signal_stop, 1)
+            write_to_shared_memory(self.signal_stop, 0, 1)
         except Exception as e:
             GLOBALS.logger.error(e)
 
@@ -49,7 +49,7 @@ class PortCaptain:
         """
         Stops the PortCaptain process.
         """
-        write_to_shared_memory(self.end_thread, 1)
+        write_to_shared_memory(self.end_thread, 1, 1)
 
     def read_input(self):
         """
