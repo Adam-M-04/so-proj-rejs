@@ -33,8 +33,8 @@ def ship_captain(passengers_on_ship, max_trips, trip_time, ship_departing_interv
         bridge_semaphore (multiprocessing.Semaphore): Semaphore to control access to the bridge.
         bridge_cleared (multiprocessing.Event): Event to signal that the bridge is cleared.
         trips_count (mmap.mmap): Shared memory for the number of trips completed.
-        log_method: Logging method from Log service
-        signal_stop: Event to signal stopping the ship captain process.
+        log_method (function): Logging method from Log service.
+        signal_stop (mmap.mmap): Shared memory for the flag indicating if the stop signal is set.
         bridge_close (multiprocessing.Event): Event to signal that the bridge is closed.
         trip_completed (mmap.mmap): Shared memory for the flag indicating if the trip is completed.
         trip_time_tracker (mmap.mmap): Shared memory for the trip time tracker.

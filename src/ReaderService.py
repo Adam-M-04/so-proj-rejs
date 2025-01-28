@@ -4,6 +4,10 @@ class ReaderService:
         """
         Reads a number from the user within the specified range, with a default value.
 
+        Clears the console, displays a message, and prompts the user to input a number.
+        If the input is within the specified range, it returns the number.
+        If the input is invalid or out of range, it prompts the user again.
+
         :param min_value: The minimum value of the range.
         :param max_value: The maximum value of the range.
         :param message: The message to display to the user.
@@ -24,7 +28,12 @@ class ReaderService:
     @staticmethod
     def read_boolean(message: str, default_value: float) -> bool:
         """
-        Reads a boolean from the user, with default value.
+        Reads a boolean from the user, with a default value.
+
+        Clears the console, displays a message, and prompts the user to input 'T' or 'N'.
+        If the input is 'T', it returns True.
+        If the input is 'N', it returns False.
+        If the input is invalid, it prompts the user again.
 
         :param message: The message to display to the user.
         :param default_value: The default value.

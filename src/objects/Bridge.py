@@ -14,18 +14,17 @@ def walk_bridge(passenger_id, bridge_direction, ship_lock, boarding_allowed, pas
         passenger_id (int): The ID of the passenger.
         bridge_direction (multiprocessing.Value): The direction of the bridge (True for boarding, False for disembarking).
         ship_lock (multiprocessing.Lock): Lock to synchronize access to the ship.
-        boarding_allowed (multiprocessing.Value): Flag indicating if boarding is allowed.
-        passengers_on_ship (multiprocessing.List): List of passengers currently on the ship.
+        boarding_allowed (mmap.mmap): Shared memory for the flag indicating if boarding is allowed.
+        passengers_on_ship (mmap.mmap): Shared memory for passengers currently on the ship.
         ship_capacity (int): The maximum capacity of the ship.
-        passengers_in_port (multiprocessing.List): List of passengers currently in the port.
-        passengers_after_trip (multiprocessing.List): List of passengers who have completed the trip.
+        passengers_in_port (mmap.mmap): Shared memory for passengers currently in the port.
+        passengers_after_trip (mmap.mmap): Shared memory for passengers who have completed the trip.
         bridge_semaphore (multiprocessing.Semaphore): Semaphore to control access to the bridge.
-        passengers_walking_bridge (multiprocessing.List): List of passengers currently walking on the bridge.
+        passengers_walking_bridge (mmap.mmap): Shared memory for passengers currently walking on the bridge.
         bridge_cleared (multiprocessing.Event): Event to signal that the bridge is cleared.
-        log_method: Queue for logging messages.
-        trip_completed (multiprocessing.Value): Flag indicating if the trip is completed.
+        log_method (function): Logging method from Log service.
+        trip_completed (mmap.mmap): Shared memory for the flag indicating if the trip is completed.
     """
-
     sleep(random.uniform(1, 2))
     bridge_direction_value = read_from_shared_memory(bridge_direction, 'i')
     if bridge_direction_value:
@@ -53,8 +52,8 @@ def enter_bridge(passengers_on_bridge, boarding_allowed, passengers_on_ship, shi
     Manages the entry of passengers onto the bridge and initiates the walking process.
 
     Args:
-        passengers_on_bridge: File descriptor for reading passengers waiting to enter the bridge.
-        boarding_allowed (multiprocessing.Value): Flag indicating if boarding is allowed.
+        passengers_on_bridge (multiprocessing.Connection): Connection object for reading passengers waiting to enter the bridge.
+        boarding_allowed (mmap.mmap): Shared memory for the flag indicating if boarding is allowed.
         passengers_on_ship (mmap.mmap): Shared memory for passengers currently on the ship.
         ship_capacity (int): The maximum capacity of the ship.
         ship_lock (multiprocessing.Lock): Lock to synchronize access to the ship.
@@ -64,7 +63,7 @@ def enter_bridge(passengers_on_bridge, boarding_allowed, passengers_on_ship, shi
         passengers_after_trip (mmap.mmap): Shared memory for passengers who have completed the trip.
         passengers_walking_bridge (mmap.mmap): Shared memory for passengers currently walking on the bridge.
         bridge_cleared (multiprocessing.Event): Event to signal that the bridge is cleared.
-        log_method: Logging method from Log service
+        log_method (function): Logging method from Log service.
         bridge_close (multiprocessing.Event): Event to signal that the bridge is closed.
         trip_completed (mmap.mmap): Shared memory for the flag indicating if the trip is completed.
     """

@@ -1,8 +1,6 @@
 import os
 import sys
 import select
-import mmap
-import struct
 from src.objects.SharedMemory import create_shared_memory, write_to_shared_memory, read_from_shared_memory
 
 import src.globals as GLOBALS
@@ -10,7 +8,7 @@ import src.globals as GLOBALS
 class PortCaptain:
     def __init__(self):
         """
-        Initializes the PortCaptain with a reference to the ShipCaptain.
+        Initializes the PortCaptain with shared memory objects for signals.
         """
         self.signal_stop = create_shared_memory(1)
         self.end_thread = create_shared_memory(1)
@@ -18,14 +16,14 @@ class PortCaptain:
 
     def send_depart_now_signal(self):
         """
-        Sends a signal to the ship captain to depart immediately.
+        Sends a signal to the ship captain to depart immediately by setting the boarding allowed flag to 0.
         """
         GLOBALS.logger.log("Wysyłanie sygnału DEPART_NOW.")
         write_to_shared_memory(self.boarding_allowed, 0, 0)
 
     def send_stop_signal(self):
         """
-        Sends a signal to stop further cruises.
+        Sends a signal to stop further cruises by setting the stop signal flag to 1.
         """
         try:
             GLOBALS.logger.log("Wysyłanie sygnału STOP_ALL_CRUISES.")
@@ -38,7 +36,7 @@ class PortCaptain:
 
     def start(self):
         """
-        Starts the PortCaptain process to listen for input from the user.
+        Starts the PortCaptain process to listen for input from the user in a separate process.
         """
         pid = os.fork()
         if pid == 0:
@@ -47,7 +45,7 @@ class PortCaptain:
 
     def stop(self):
         """
-        Stops the PortCaptain process.
+        Stops the PortCaptain process by setting the end thread flag to 1.
         """
         write_to_shared_memory(self.end_thread, 1, 1)
 

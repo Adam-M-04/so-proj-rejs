@@ -1,4 +1,3 @@
-from time import sleep
 import src.globals as GLOBALS
 from src.LogService import LogService
 from src.ReaderService import ReaderService
@@ -6,6 +5,12 @@ from src.SimulationDisplay import SimulationDisplay
 from src.simulation import simulation
 
 def main():
+    """
+    Main function to start the simulation.
+
+    This function initializes the global logger, reads simulation parameters,
+    logs the parameters, starts the simulation display, and runs the simulation.
+    """
     try:
         # Create a shared LogService instance
         GLOBALS.logger = LogService()

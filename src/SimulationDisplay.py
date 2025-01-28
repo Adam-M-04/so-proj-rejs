@@ -51,6 +51,9 @@ class SimulationDisplay:
         print("\033[H\033[J", end="")
 
     def print_actions(self):
+        """
+        Prints the available actions for the user.
+        """
         print("\n=== AKCJE ===")
         print("r + enter - zatrzymaj rejs")
         print("d + enter - natychmiastowy odpływ")
@@ -58,6 +61,13 @@ class SimulationDisplay:
     def update_display(self, passengers_in_port, passengers_on_bridge_r, passengers_walking_bridge, passengers_on_ship, passengers_after_trip, trip_time_tracker):
         """
         Clears the terminal and displays the updated simulation data.
+
+        :param passengers_in_port: Shared memory object for passengers in port.
+        :param passengers_on_bridge_r: Shared memory object for passengers on bridge (read end).
+        :param passengers_walking_bridge: Shared memory object for passengers walking on the bridge.
+        :param passengers_on_ship: Shared memory object for passengers on the ship.
+        :param passengers_after_trip: Shared memory object for passengers after the trip.
+        :param trip_time_tracker: Shared memory object for tracking trip time.
         """
         try:
             self.clear()

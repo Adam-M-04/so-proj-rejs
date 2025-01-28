@@ -20,11 +20,16 @@ class LogService:
     def _create_log_file(self, file):
         """
         Creates a new log file and writes the creation timestamp.
+
+        :param file: The file object to write the log creation timestamp.
         """
         file.write(f"Logi symulacji utworzone {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         file.flush()
 
     def _log_writer(self):
+        """
+        Continuously reads from the pipe and writes log records to the log file.
+        """
         with open(self.log_file, 'w') as file:
             self._create_log_file(file)
             while not self.stop_event.is_set():
