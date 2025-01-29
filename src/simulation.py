@@ -49,12 +49,16 @@ def simulation(display: SimulationDisplay):
     processes = []
 
     def fork_process(target, args):
-        pid = os.fork()
-        if pid == 0:
-            target(*args)
-            os._exit(0)
-        else:
-            return pid
+        try:
+            pid = os.fork()
+            if pid == 0:
+                target(*args)
+                os._exit(0)
+            else:
+                return pid
+        except OSError as e:
+            GLOBALS.logger.error(f"Fork failed: {e}")
+            return None
 
     # Create the bridge process
     processes.append(fork_process(enter_bridge, (

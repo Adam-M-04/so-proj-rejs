@@ -73,12 +73,15 @@ def enter_bridge(passengers_on_bridge, boarding_allowed, passengers_on_ship, shi
             passenger_id = passengers_on_bridge.recv()
             append_to_shared_memory(passengers_walking_bridge, passenger_id)
 
-            pid = os.fork()
-            if pid == 0:  # Child process
-                walk_bridge(passenger_id, bridge_direction, ship_lock, boarding_allowed, passengers_on_ship,
-                            ship_capacity, passengers_in_port,
-                            passengers_after_trip, bridge_semaphore, passengers_walking_bridge, bridge_cleared,
-                            log_method, trip_completed)
-                os._exit(0)
+            try:
+                pid = os.fork()
+                if pid == 0:  # Child process
+                    walk_bridge(passenger_id, bridge_direction, ship_lock, boarding_allowed, passengers_on_ship,
+                                ship_capacity, passengers_in_port,
+                                passengers_after_trip, bridge_semaphore, passengers_walking_bridge, bridge_cleared,
+                                log_method, trip_completed)
+                    os._exit(0)
+            except OSError as e:
+                return None
         else:
             sleep(0.1)

@@ -38,10 +38,13 @@ class PortCaptain:
         """
         Starts the PortCaptain process to listen for input from the user in a separate process.
         """
-        pid = os.fork()
-        if pid == 0:
-            self.read_input()
-            os._exit(0)
+        try:
+            pid = os.fork()
+            if pid == 0:
+                self.read_input()
+                os._exit(0)
+        except OSError as e:
+            return None
 
     def stop(self):
         """
