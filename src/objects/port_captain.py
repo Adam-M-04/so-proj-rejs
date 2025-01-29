@@ -14,19 +14,6 @@ class PortCaptain:
         self.signal_stop = create_shared_memory(1)
         self.end_thread = create_shared_memory(1)
         self.boarding_allowed = create_shared_memory(1)
-        signal.signal(signal.SIGCHLD, self._handle_sigchld)
-
-    def _handle_sigchld(self, signum, frame):
-        """
-        Handles the SIGCHLD signal to prevent zombie processes.
-        """
-        while True:
-            try:
-                pid, _ = os.waitpid(-1, os.WNOHANG)
-                if pid == 0:
-                    break
-            except ChildProcessError:
-                break
 
     def send_depart_now_signal(self):
         """
